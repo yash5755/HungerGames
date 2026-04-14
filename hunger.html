@@ -1886,6 +1886,7 @@ let analytics = null;
 let authUser = null;
 let firebaseReady = false;
 let syncTimer = null;
+let cloudPollTimer = null;
 let quizRoomState = {
   roundKey: null,
   tributeId: null,
@@ -2660,9 +2661,15 @@ function initFirebase() {
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
       if(deduplicateTributesbyUID()) queueCloudSync();
+      if(deduplicateTributesbyEmail()) queueCloudSync();
       rebuildUidToTributeIdMapping();
       rerenderAfterSync();
+    }, (error) => {
+      console.error('Realtime sync listener error:', error);
+      startCloudPolling();
     });
+
+    startCloudPolling();
 
     auth.onAuthStateChanged(async (user) => {
       authUser = user || null;
@@ -2712,6 +2719,14 @@ function queueCloudSync() {
   if(!firebaseReady || !db) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(pushStateToCloud, 350);
+}
+
+function startCloudPolling() {
+  if(cloudPollTimer) clearInterval(cloudPollTimer);
+  if(!firebaseReady || !db) return;
+  cloudPollTimer = setInterval(() => {
+    syncStateFromCloud();
+  }, 5000);
 }
 
 async function pushStateToCloud() {
