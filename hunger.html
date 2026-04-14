@@ -1148,7 +1148,7 @@ footer {
   <div class="ticker-track">
     <div class="ticker-inner" id="tickerInner">
       <span class="ticker-item">The Arena is open · <span>150 Tributes</span> enter today</span>
-      <span class="ticker-item">Round 1 — <span>The Bloodbath</span> · Digital Speed Trial</span>
+      <span class="ticker-item">Round 1 — <span>The Bloodbath</span> · 3-Phased Digital Trial</span>
       <span class="ticker-item">Top <span>60 Survivors</span> advance to Round 2</span>
       <span class="ticker-item">Round 2 — <span>The Tracker Jacker Trial</span> · Navigate the Logic Maze</span>
       <span class="ticker-item">Top <span>20 Semifinalists</span> advance to Round 3</span>
@@ -1156,7 +1156,7 @@ footer {
       <span class="ticker-item">Top <span>5 Finalists</span> advance to the Victor's Podium</span>
       <span class="ticker-item">Organised by <span>AWS Cloud Club VVCE</span> · Hosted at your college</span>
       <span class="ticker-item">The Arena is open · <span>150 Tributes</span> enter today</span>
-      <span class="ticker-item">Round 1 — <span>The Bloodbath</span> · Digital Speed Trial</span>
+      <span class="ticker-item">Round 1 — <span>The Bloodbath</span> · 3-Phased Digital Trial</span>
       <span class="ticker-item">Top <span>60 Survivors</span> advance to Round 2</span>
       <span class="ticker-item">Round 2 — <span>The Tracker Jacker Trial</span> · Navigate the Logic Maze</span>
     </div>
@@ -1294,19 +1294,20 @@ footer {
       <div class="round-num-bg">I</div>
       <div class="round-badge">
         <span class="round-badge-num">Round 01</span>
-        <span class="round-badge-label">Digital Speed Trial</span>
+        <span class="round-badge-label">3-Phased Digital Trial</span>
       </div>
       <div class="round-title">The Bloodbath</div>
-      <div class="round-sub">// Digital Speed Trial //</div>
+      <div class="round-sub">// 3-Phased Digital Trial //</div>
       <div class="tag-group">
-        <span class="tag">120 Participants</span><span class="tag">3 Phases</span><span class="tag">Multiplier + MCQ</span><span class="tag">Speed + Accuracy</span>
+        <span class="tag">120 Participants</span><span class="tag">Mystery Image</span><span class="tag">Architecture Leak</span><span class="tag">MCQ Speed Quiz</span>
       </div>
-      <p class="round-desc">All 120 participants take part simultaneously in a three-phased engagement. Two Multiplier Challenges lead into a live MCQ quiz where both speed and accuracy matter.</p>
+      <p class="round-desc">Round 1 runs as a 3-phased digital trial: Mystery Image (Multiplier 1), Architecture Leak (Multiplier 2), and MCQ Speed Quiz. The final output is the Top 60 survivors.</p>
       <ul class="round-details">
-        <li>Phase 1 and 2 — Multiplier Challenges before the MCQ round</li>
-        <li>Live MCQ quiz across speed-based questions</li>
-        <li>Topics covered: general technology, pattern recognition, aptitude, and more</li>
-        <li>Calculated survival scores decide the Top 60 movers</li>
+        <li>Phase 1 — Mystery Image challenge using blurred, zoomed, or partial visuals</li>
+        <li>Phase 2 — Architecture Leak challenge using system diagrams and logic questions</li>
+        <li>Phase 3 — MCQ Speed Quiz (20 to 30 questions, 10 to 15 seconds each)</li>
+        <li>Final Score = (MCQ Score) x (Image Multiplier) x (Architecture Multiplier)</li>
+        <li>Execution model: single Google Form with 3 sections, then sheet-based Top 60 ranking</li>
       </ul>
       <div class="survival-badge">
         <span class="survival-badge-icon">⚠</span>
@@ -1736,7 +1737,7 @@ footer {
             <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);margin-bottom:1rem;letter-spacing:0.1em">Round Links</div>
             <div style="display:grid;gap:0.8rem">
               <div class="form-group">
-                <label class="form-label">Round 1 Quiz Link (Bloodbath)</label>
+                <label class="form-label">Round 1 Master Form Link (Bloodbath: 3 Phases)</label>
                 <input class="admin-input" id="cfg_r1link" type="url" placeholder="https://forms.google.com/...">
               </div>
               <div class="form-group">
@@ -1839,7 +1840,7 @@ function createDefaultLiveState() {
     sessions: {},
     results: {},
     rounds: {
-      r1: createDefaultLiveRound('r1', 'The Bloodbath', 'Digital Speed Trial', 'Two multiplier challenges followed by a live MCQ quiz.', 'registered', 45),
+      r1: createDefaultLiveRound('r1', 'The Bloodbath', '3-Phased Digital Trial', 'Phase 1 Mystery Image (Multiplier), Phase 2 Architecture Leak (Multiplier), Phase 3 MCQ Speed Quiz. Final Score = MCQ x Image Multiplier x Architecture Multiplier. Top 60 advance.', 'registered', 45),
       r2: createDefaultLiveRound('r2', 'The Tracker Jacker Trail', 'Digital Logical Labyrinth', 'Branching Google Form logic with gate checkpoints and dead-end traps.', 'qualified', 30),
       r3: createDefaultLiveRound('r3', 'The Mockingjay\'s Blueprint', 'Lightning Ideathon', 'Strategy, design, and pitch for the semifinalists.', 'r2', 40),
       r4: createDefaultLiveRound('r4', 'The Victor\'s Podium', 'Stump the Architect', 'Rapid-fire final showdown for the last five finalists.', 'r3', 20)
@@ -3136,7 +3137,25 @@ function gradeQuiz(roundKey, tributeId) {
     const raw = String(getQuizAnswerFor(roundKey, tributeId, question.id) || '').trim();
     if(question.type === 'mcq') {
       const correct = String(question.correctAnswer || question.correctIndex || '').trim();
-      if(raw !== '' && raw === correct) score += 1;
+      const normalizedRaw = raw.toLowerCase();
+      const normalizedCorrect = correct.toLowerCase();
+      const letterMap = ['a', 'b', 'c', 'd'];
+      const rawIndex = /^\d+$/.test(raw) ? parseInt(raw, 10) : -1;
+      const correctIndex = /^\d+$/.test(correct) ? parseInt(correct, 10) : -1;
+      const rawAsLetter = rawIndex >= 0 && rawIndex < letterMap.length ? letterMap[rawIndex] : normalizedRaw;
+      const correctAsLetter = correctIndex >= 0 && correctIndex < letterMap.length ? letterMap[correctIndex] : normalizedCorrect;
+      const optionByRawIndex = rawIndex >= 0 ? String((question.options || [])[rawIndex] || '').trim().toLowerCase() : '';
+      const optionByCorrectIndex = correctIndex >= 0 ? String((question.options || [])[correctIndex] || '').trim().toLowerCase() : '';
+      const matched = (
+        normalizedRaw !== '' && (
+          normalizedRaw === normalizedCorrect ||
+          rawAsLetter === normalizedCorrect ||
+          normalizedRaw === correctAsLetter ||
+          optionByRawIndex === normalizedCorrect ||
+          normalizedRaw === optionByCorrectIndex
+        )
+      );
+      if(matched) score += 1;
     } else {
       const correctText = String(question.correctAnswer || '').trim().toLowerCase();
       if(raw && correctText && raw.toLowerCase() === correctText) score += 1;
@@ -3155,6 +3174,7 @@ function finalizeQuizRoom(autoSubmit) {
   state.live.results[roundKey] = state.live.results[roundKey] || {};
 
   const graded = gradeQuiz(roundKey, tributeId);
+  const previousResult = state.live.results[roundKey][tributeId] || null;
   state.live.sessions[roundKey][tributeId] = {
     ...(state.live.sessions[roundKey][tributeId] || {}),
     submittedAt: new Date().toISOString(),
@@ -3164,12 +3184,24 @@ function finalizeQuizRoom(autoSubmit) {
     ...graded,
     submittedAt: new Date().toISOString()
   };
+
+  const tribute = state.tributes.find((t) => t.id === tributeId);
+  if(tribute) {
+    const existingScore = Number(tribute.score) || 0;
+    const previousRoundScore = Number(previousResult?.score || 0);
+    tribute.score = Math.max(0, existingScore - previousRoundScore + Number(graded.score || 0));
+  }
+
   saveState();
   quizRoomState.isSubmitted = true;
   if(quizRoomState.timerHandle) {
     clearInterval(quizRoomState.timerHandle);
     quizRoomState.timerHandle = null;
   }
+  renderTributeTable();
+  renderAdminLeaderboard();
+  renderPublicLeaderboard();
+  renderOverview();
   renderQuizRoom();
   showToast(autoSubmit ? 'Time is up. Quiz auto-submitted.' : 'Quiz submitted successfully.', 'success');
 }
