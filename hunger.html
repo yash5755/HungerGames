@@ -2260,7 +2260,40 @@ function generateTributeId() {
   return 'HG-' + String(Math.floor(100000 + Math.random() * 900000));
 }
 
+function getTributeIdFromUidMapping(uid) {
+  try {
+    const mapping = JSON.parse(localStorage.getItem('hg_uid_to_tribute_id') || '{}');
+    return mapping[uid] || null;
+  } catch(e) { return null; }
+}
+
+function saveTributeIdToUidMapping(uid, tributeId) {
+  try {
+    const mapping = JSON.parse(localStorage.getItem('hg_uid_to_tribute_id') || '{}');
+    mapping[uid] = tributeId;
+    localStorage.setItem('hg_uid_to_tribute_id', JSON.stringify(mapping));
+  } catch(e) {}
+}
+
+function rebuildUidToTributeIdMapping() {
+  try {
+    const mapping = {};
+    (state.tributes || []).forEach(t => {
+      if(t.uid && t.id) {
+        mapping[t.uid] = t.id;
+      }
+    });
+    localStorage.setItem('hg_uid_to_tribute_id', JSON.stringify(mapping));
+  } catch(e) {}
+}
+
 function findTributeByUid(uid) {
+  if(!uid) return null;
+  const mappedId = getTributeIdFromUidMapping(uid);
+  if(mappedId) {
+    const tribute = state.tributes.find(t => t.id === mappedId);
+    if(tribute) return tribute;
+  }
   return state.tributes.find(t => t.uid === uid);
 }
 
@@ -2294,6 +2327,7 @@ function getOrCreateTributeDraft(user) {
     tribute.photoURL = user.photoURL || tribute.photoURL || '';
     if(!tribute.id) tribute.id = generateTributeId();
     if(!tribute.status || tribute.status === 'pending') tribute.status = 'pending';
+    saveTributeIdToUidMapping(user.uid, tribute.id);
   } else {
     tribute = {
       id: generateTributeId(),
@@ -2311,6 +2345,8 @@ function getOrCreateTributeDraft(user) {
       registeredAt: new Date().toISOString()
     };
     state.tributes.push(tribute);
+    saveTributeIdToUidMapping(user.uid, tribute.id);
+    queueCloudSync();
   }
   return tribute;
 }
@@ -2524,6 +2560,7 @@ function initFirebase() {
         live: mergeLiveState(remote.live)
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
+      rebuildUidToTributeIdMapping();
       rerenderAfterSync();
     });
 
@@ -2603,6 +2640,7 @@ async function syncStateFromCloud() {
         live: mergeLiveState(remote.live)
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
+      rebuildUidToTributeIdMapping();
       rerenderAfterSync();
     } else {
       await pushStateToCloud();
