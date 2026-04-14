@@ -1806,6 +1806,12 @@ function findTributeByEmail(email) {
   return state.tributes.find(t => (t.email || '').toLowerCase() === (email || '').toLowerCase());
 }
 
+function findTributeById(id) {
+  const key = String(id || '').trim().toUpperCase();
+  if(!key) return null;
+  return state.tributes.find(t => String(t.id || '').trim().toUpperCase() === key) || null;
+}
+
 function normalizeName(name) {
   return String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
@@ -1855,6 +1861,52 @@ function getSignedInTribute() {
     if(!tribute.email && authUser.email) tribute.email = String(authUser.email).toLowerCase();
   }
   return tribute;
+}
+
+function getManualLiveTribute() {
+  try {
+    const savedId = localStorage.getItem('hg_live_tribute_id') || '';
+    return findTributeById(savedId);
+  } catch (e) {
+    return null;
+  }
+}
+
+function joinLiveWithTributeId() {
+  const input = document.getElementById('liveJoinTributeId');
+  const msg = document.getElementById('liveJoinMsg');
+  const id = (input?.value || '').trim().toUpperCase();
+  if(!id) {
+    if(msg) {
+      msg.className = 'form-msg error';
+      msg.textContent = 'Enter your Tribute ID first.';
+    }
+    return;
+  }
+  const tribute = findTributeById(id);
+  if(!tribute) {
+    if(msg) {
+      msg.className = 'form-msg error';
+      msg.textContent = 'Tribute ID not found. Check and try again.';
+    }
+    return;
+  }
+  try { localStorage.setItem('hg_live_tribute_id', tribute.id); } catch (e) {}
+  if(msg) {
+    msg.className = 'form-msg success';
+    msg.textContent = `Linked to ${tribute.name} (${tribute.status}).`;
+  }
+  renderLiveArena();
+}
+
+function clearLiveJoinLink() {
+  try { localStorage.removeItem('hg_live_tribute_id'); } catch (e) {}
+  const msg = document.getElementById('liveJoinMsg');
+  if(msg) {
+    msg.className = 'form-msg';
+    msg.textContent = '';
+  }
+  renderLiveArena();
 }
 
 function roundLabelForStatus(status) {
@@ -2740,22 +2792,33 @@ function renderLiveArena() {
     return;
   }
 
-  if(!authUser) {
-    container.innerHTML = `
-      <div class="live-room-card">
-        <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
-        <div class="live-room-sub">Sign in with Google to attend the live round when your status qualifies.</div>
-      </div>
-    `;
-    return;
+  let tribute = null;
+  let accessMode = 'none';
+  if(authUser) {
+    tribute = getSignedInTribute();
+    if(tribute) accessMode = 'google';
+  }
+  if(!tribute) {
+    tribute = getManualLiveTribute();
+    if(tribute) accessMode = 'tribute-id';
   }
 
-  const tribute = getSignedInTribute();
   if(!tribute) {
     container.innerHTML = `
       <div class="live-room-card">
         <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
-        <div class="live-room-sub">Your account is signed in, but no tribute profile was found yet. Complete registration once, then reopen this live round.</div>
+        <div class="live-room-sub">Sign in with Google, or join with your Tribute ID to attend this live round when your status qualifies.</div>
+        <div class="live-answer-row" style="margin-top:1rem">
+          <button class="google-btn" onclick="signInWithGoogle()">Continue with Google</button>
+        </div>
+        <div class="form-row" style="margin-top:0.9rem;grid-template-columns:1fr auto;gap:0.7rem;align-items:end">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Or Enter Tribute ID</label>
+            <input class="form-input" id="liveJoinTributeId" type="text" placeholder="HG-123456">
+          </div>
+          <button class="admin-btn admin-btn-primary" onclick="joinLiveWithTributeId()">Join</button>
+        </div>
+        <div id="liveJoinMsg" class="form-msg" style="text-align:left;margin-top:0.6rem"></div>
       </div>
     `;
     return;
@@ -2766,6 +2829,10 @@ function renderLiveArena() {
       <div class="live-room-card">
         <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
         <div class="live-room-sub">This round is live, but your current status (${escapeHTML(tribute.status || 'pending')}) does not qualify yet.</div>
+        ${accessMode === 'tribute-id' ? '<div class="live-room-sub" style="margin-top:0.5rem">Access mode: Tribute ID link</div>' : ''}
+        <div class="live-answer-row" style="margin-top:0.8rem">
+          <button class="admin-btn admin-btn-danger" onclick="clearLiveJoinLink()">Use Different Tribute ID</button>
+        </div>
       </div>
     `;
     return;
@@ -2782,6 +2849,7 @@ function renderLiveArena() {
         </div>
         <div class="live-badge"><div class="live-dot"></div>Accessible now</div>
       </div>
+      ${accessMode === 'tribute-id' ? '<div class="live-room-sub" style="margin-bottom:0.7rem">Access mode: Tribute ID link</div>' : ''}
       <div class="status-chip" style="margin-bottom:1rem">
         <span class="status-chip-label">Instructions</span>
         <div class="status-chip-value">${escapeHTML(round.instructions || 'No instructions published yet.')}</div>
@@ -2804,6 +2872,7 @@ function renderLiveArena() {
           `;
         }).join('') : '<div class="live-question-card"><div class="live-question-title">No questions published yet</div><div class="live-question-meta">Open the admin panel and add the question set for this round.</div></div>'}
       </div>
+      ${accessMode === 'tribute-id' ? '<div class="live-answer-row" style="margin-top:0.9rem"><button class="admin-btn admin-btn-danger" onclick="clearLiveJoinLink()">Disconnect Tribute ID</button></div>' : ''}
     </div>
   `;
 }
