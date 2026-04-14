@@ -891,6 +891,20 @@ nav {
   text-transform: uppercase;
 }
 
+.phase-visual.real::before {
+  display: none;
+}
+
+.phase-visual-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(9px) saturate(0.95);
+  transform: scale(1.05);
+}
+
 .round4-layout {
   display:grid;
   grid-template-columns:1fr auto;
@@ -1942,6 +1956,7 @@ function createRound1MysteryImageSet() {
       type: 'mcq',
       options: ['AWS', 'Azure', 'GCP', 'DigitalOcean'],
       correctAnswer: '0',
+      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg',
       explanation: 'This blurred logo corresponds to AWS.'
     },
     {
@@ -1951,6 +1966,7 @@ function createRound1MysteryImageSet() {
       type: 'mcq',
       options: ['Python', 'Java', 'JavaScript', 'C++'],
       correctAnswer: '0',
+      imageUrl: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1400&q=80',
       explanation: 'Selected sample corresponds to Python syntax.'
     },
     {
@@ -1960,6 +1976,7 @@ function createRound1MysteryImageSet() {
       type: 'mcq',
       options: ['Web App Dashboard', 'Desktop IDE', 'Command Line Tool', 'Smartwatch App'],
       correctAnswer: '0',
+      imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=80',
       explanation: 'UI fragment maps to a web dashboard platform.'
     },
     {
@@ -1992,6 +2009,7 @@ function createRound1ArchitectureLeakSet() {
       type: 'mcq',
       options: ['Distribute traffic across servers', 'Store user passwords', 'Compile source code', 'Encrypt only database rows'],
       correctAnswer: '0',
+      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Client-server-model.svg',
       explanation: 'Load balancer distributes incoming traffic.'
     },
     {
@@ -2001,6 +2019,7 @@ function createRound1ArchitectureLeakSet() {
       type: 'mcq',
       options: ['Read/write operations fail for data-dependent requests', 'Only CSS fails to load', 'Load balancer automatically stores data', 'Frontend compiles itself'],
       correctAnswer: '0',
+      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80',
       explanation: 'Without DB availability, data operations fail.'
     },
     {
@@ -2010,6 +2029,7 @@ function createRound1ArchitectureLeakSet() {
       type: 'mcq',
       options: ['Auto Scaling Group / Orchestrator', 'Single browser tab', 'SQL query formatter', 'Local text editor'],
       correctAnswer: '0',
+      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Cloud_computing.svg',
       explanation: 'Scaling is managed by orchestrator/auto-scaling control plane.'
     },
     {
@@ -3806,7 +3826,9 @@ function renderQuizRoom() {
     ? `<div class="quiz-options">${(q.options || []).map((opt, i) => `<button class="quiz-option ${answer === String(i) ? 'active' : ''}" onclick="selectQuizOption(${i})">${escapeHTML(opt || ('Option ' + (i + 1)))}</button>`).join('')}</div>`
     : `<div class="form-group"><label class="form-label">Your Answer</label><input class="form-input" id="quizTextAnswer" type="text" value="${escapeHTML(answer)}" placeholder="Type your answer"></div><div class="quiz-actions"><button class="admin-btn admin-btn-primary" onclick="saveQuizTextAnswer()">Save Answer</button></div>`;
   const phaseVisual = roundKey === 'r1' && (phaseKey === 'phase1' || phaseKey === 'phase2')
-    ? `<div class="phase-visual phase-${phaseKey} v-${(index % 3) + 1}"><div class="phase-visual-overlay">Blurred challenge visual ${index + 1}</div></div>`
+    ? q.imageUrl
+      ? `<div class="phase-visual phase-${phaseKey} real"><img class="phase-visual-image" src="${escapeHTML(q.imageUrl)}" alt="Challenge visual"><div class="phase-visual-overlay">Blurred challenge visual ${index + 1}</div></div>`
+      : `<div class="phase-visual phase-${phaseKey} v-${(index % 3) + 1}"><div class="phase-visual-overlay">Blurred challenge visual ${index + 1}</div></div>`
     : '';
 
   body.innerHTML = `
