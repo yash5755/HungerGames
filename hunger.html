@@ -2318,6 +2318,43 @@ function deduplicateTributesbyUID() {
   return removed;
 }
 
+function deduplicateTributesbyEmail() {
+  const byEmail = {};
+  (state.tributes || []).forEach(t => {
+    const email = (t.email || '').toLowerCase();
+    if(!email) return;
+    if(!byEmail[email]) {
+      byEmail[email] = [t];
+    } else {
+      byEmail[email].push(t);
+    }
+  });
+  
+  let removed = false;
+  Object.keys(byEmail).forEach(email => {
+    if(byEmail[email].length > 1) {
+      const sorted = byEmail[email].sort((a, b) => {
+        const scoreA = (a.status === 'registered' ? 10 : a.status === 'qualified' ? 5 : 0) + (a.usn ? 2 : 0) + (a.uid ? 3 : 0);
+        const scoreB = (b.status === 'registered' ? 10 : b.status === 'qualified' ? 5 : 0) + (b.usn ? 2 : 0) + (b.uid ? 3 : 0);
+        return scoreB - scoreA;
+      });
+      const keep = sorted[0];
+      for(let i = 1; i < sorted.length; i++) {
+        const removed_tribute = sorted[i];
+        state.tributes = state.tributes.filter(t => t.id !== removed_tribute.id);
+        keep.uid = keep.uid || removed_tribute.uid;
+        keep.usn = keep.usn || removed_tribute.usn;
+        keep.phone = keep.phone || removed_tribute.phone;
+        keep.branch = keep.branch || removed_tribute.branch;
+        keep.year = keep.year || removed_tribute.year;
+        keep.photoURL = keep.photoURL || removed_tribute.photoURL;
+        removed = true;
+      }
+    }
+  });
+  return removed;
+}
+
 function findTributeByUid(uid) {
   if(!uid) return null;
   const mappedId = getTributeIdFromUidMapping(uid);
@@ -2674,6 +2711,7 @@ async function syncStateFromCloud() {
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
       if(deduplicateTributesbyUID()) queueCloudSync();
+      if(deduplicateTributesbyEmail()) queueCloudSync();
       rebuildUidToTributeIdMapping();
       rerenderAfterSync();
     } else {
@@ -2852,8 +2890,18 @@ async function signInWithGoogle() {
     
     authUser = user;
     await syncStateFromCloud();
+    if(deduplicateTributesbyUID()) queueCloudSync();
+    if(deduplicateTributesbyEmail()) queueCloudSync();
+    rebuildUidToTributeIdMapping();
     
-    const tribute = getSignedInTribute() || getOrCreateTributeDraft(user);
+    let tribute = getSignedInTribute();
+    if(!tribute) {
+      tribute = state.tributes.find(t => t.uid === user.uid);
+    }
+    if(!tribute) {
+      tribute = getOrCreateTributeDraft(user);
+    }
+    
     saveState();
     document.getElementById('tributeIdDisplay').textContent = tribute.id;
     document.getElementById('successModal').classList.add('open');
