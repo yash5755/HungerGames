@@ -1731,7 +1731,12 @@ function getRequiredAccessStatus(roundKey) {
 }
 
 function canAttendLiveRound(status, roundKey) {
-  return !!roundKey && status === getRequiredAccessStatus(roundKey);
+  if(!roundKey || !status) return false;
+  const normalizedStatus = String(status).trim().toLowerCase();
+  if(normalizedStatus === 'eliminated') return false;
+  const rank = { pending: 0, registered: 1, qualified: 2, r2: 3, r3: 4, victor: 5 };
+  const required = String(getRequiredAccessStatus(roundKey)).trim().toLowerCase();
+  return (rank[normalizedStatus] || 0) >= (rank[required] || 0);
 }
 
 function createLiveQuestion() {
@@ -1833,7 +1838,12 @@ function getOrCreateTributeDraft(user) {
 
 function getSignedInTribute() {
   if(!authUser) return null;
-  return findTributeByUid(authUser.uid) || findTributeByEmail(authUser.email);
+  let tribute = findTributeByUid(authUser.uid) || findTributeByEmail(authUser.email);
+  if(!tribute && authUser.email) {
+    tribute = getOrCreateTributeDraft(authUser);
+    saveState();
+  }
+  return tribute;
 }
 
 function roundLabelForStatus(status) {
@@ -2709,12 +2719,22 @@ function renderLiveArena() {
     return;
   }
 
+  if(!authUser) {
+    container.innerHTML = `
+      <div class="live-room-card">
+        <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
+        <div class="live-room-sub">Sign in with Google to attend the live round when your status qualifies.</div>
+      </div>
+    `;
+    return;
+  }
+
   const tribute = getSignedInTribute();
   if(!tribute) {
     container.innerHTML = `
       <div class="live-room-card">
         <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
-        <div class="live-room-sub">Sign in with Google to attend the live round when your status qualifies.</div>
+        <div class="live-room-sub">Your account is signed in, but no tribute profile was found yet. Complete registration once, then reopen this live round.</div>
       </div>
     `;
     return;
