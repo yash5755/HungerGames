@@ -1983,6 +1983,26 @@ function createRound1QuestionBank() {
   return [...createRound1MysteryImageSet(), ...createRound1ArchitectureLeakSet(), ...phase3];
 }
 
+function hasRound1MultiplierPhases(questions) {
+  const list = Array.isArray(questions) ? questions : [];
+  const hasPhase1 = list.some((question) => question?.section === 'phase1' || String(question?.id || '').startsWith('q-r1-m1-'));
+  const hasPhase2 = list.some((question) => question?.section === 'phase2' || String(question?.id || '').startsWith('q-r1-m2-'));
+  return hasPhase1 && hasPhase2;
+}
+
+function ensureRound1ThreePhaseQuestions(roundKey) {
+  if(roundKey !== 'r1') return false;
+  state.live = state.live || createDefaultLiveState();
+  state.live.rounds = state.live.rounds || createDefaultLiveState().rounds;
+  const round = state.live.rounds.r1;
+  if(!round) return false;
+  if(!hasRound1MultiplierPhases(round.questions)) {
+    round.questions = createRound1QuestionBank();
+    return true;
+  }
+  return false;
+}
+
 function createDefaultLiveState() {
   return {
     activeRound: 'r1',
@@ -2006,9 +2026,7 @@ function mergeLiveState(remoteLive) {
   const remoteRounds = remoteLive?.rounds || {};
   const mergedR1 = { ...base.rounds.r1, ...(remoteRounds.r1 || {}) };
   const r1Questions = Array.isArray(remoteRounds.r1?.questions) ? remoteRounds.r1.questions : [];
-  const hasPhase1 = r1Questions.some((question) => question?.section === 'phase1' || String(question?.id || '').startsWith('q-r1-m1-'));
-  const hasPhase2 = r1Questions.some((question) => question?.section === 'phase2' || String(question?.id || '').startsWith('q-r1-m2-'));
-  if(!r1Questions.length || !hasPhase1 || !hasPhase2) {
+  if(!r1Questions.length || !hasRound1MultiplierPhases(r1Questions)) {
     mergedR1.questions = base.rounds.r1.questions;
   }
   return {
@@ -2045,6 +2063,7 @@ function canAttendLiveRound(status, roundKey) {
 function createLiveQuestion() {
   return {
     id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    section: 'phase3',
     prompt: '',
     type: 'mcq',
     options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
@@ -2943,6 +2962,7 @@ function renderLiveRoundEditor() {
   const container = document.getElementById('liveRoundEditor');
   if(!container) return;
   const roundKey = liveEditorRound || state.currentPhase || 'r1';
+  if(ensureRound1ThreePhaseQuestions(roundKey)) saveState();
   const round = getLiveRound(roundKey);
   const questions = Array.isArray(round.questions) ? round.questions : [];
 
@@ -3004,12 +3024,17 @@ function renderLiveRoundEditor() {
       <div class="live-room-sub">Published: ${round.published ? 'Yes' : 'No'} · Eligible status: ${escapeHTML(round.eligibleStatus || 'registered')} · Time limit: ${escapeHTML(round.timeLimitMinutes || 0)} min</div>
       <div style="margin-top:0.85rem;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--pale)">Questions configured: ${questions.length}</div>
     </div>
+    <div class="live-status-card" style="margin-top:1rem">
+      <div class="live-room-title" style="font-size:0.95rem;margin-bottom:0.2rem">Attendance & Retakes</div>
+      <div class="live-room-sub">Who attended this round, who submitted, and who can be allowed another attempt.</div>
+      <div id="quizAttendancePanel" style="margin-top:0.9rem"></div>
+    </div>
   `;
 
   const list = document.getElementById('liveQuestionEditorList');
   if(list) {
     list.innerHTML = questions.map((question, index) => `
-      <div class="live-question-editor" data-index="${index}">
+      <div class="live-question-editor" data-index="${index}" data-section="${escapeHTML(question.section || 'phase3')}">
         <div class="live-question-editor-head">
           <div class="live-question-editor-title">Question ${index + 1}</div>
           <button class="admin-btn admin-btn-danger" onclick="removeLiveQuestion(${index})">Remove</button>
@@ -3049,6 +3074,8 @@ function renderLiveRoundEditor() {
       </div>
     `).join('');
   }
+
+  renderQuizAttendancePanel(roundKey);
 }
 
 function addLiveQuestion() {
@@ -3094,6 +3121,7 @@ function saveLiveRoundEditor(forcePublish, forceUnpublish) {
     const options = [...card.querySelectorAll('.live-q-option')].map(input => input.value.trim()).filter(Boolean);
     return {
       id: card.dataset.index ? `q-${roundKey}-${card.dataset.index}` : createLiveQuestion().id,
+      section: card.dataset.section || 'phase3',
       prompt,
       type,
       options,
@@ -3144,6 +3172,8 @@ function renderLiveArena() {
   const round = getLiveRound(roundKey);
   section.style.display = 'block';
 
+  if(roundKey === 'r1' && ensureRound1ThreePhaseQuestions(roundKey)) saveState();
+
   if(!round.published) {
     container.innerHTML = `
       <div class="live-room-card">
@@ -3193,8 +3223,9 @@ function renderLiveArena() {
     return;
   }
 
-  const questions = Array.isArray(round.questions) ? round.questions : [];
   const liveResponseState = state.live?.submissions?.[roundKey]?.[tribute.id] || {};
+  const session = state.live?.sessions?.[roundKey]?.[tribute.id] || {};
+  const result = state.live?.results?.[roundKey]?.[tribute.id] || null;
   container.innerHTML = `
     <div class="live-room-card">
       <div class="live-room-head">
@@ -3209,28 +3240,84 @@ function renderLiveArena() {
         <span class="status-chip-label">Instructions</span>
         <div class="status-chip-value">${escapeHTML(round.instructions || 'No instructions published yet.')}</div>
       </div>
-      <div class="live-room-sub" style="margin-bottom:0.75rem">Time limit: ${escapeHTML(round.timeLimitMinutes || 0)} minutes · Questions: ${questions.length} · Your status: ${escapeHTML(tribute.status || 'pending')}</div>
-      <div class="live-question-list">
-        ${questions.length ? questions.map((question, index) => {
-          const saved = liveResponseState[question.id]?.answer || '';
-          const answerFieldId = `live-answer-${roundKey}-${index}`;
-          const options = question.type === 'mcq'
-            ? `<input type="hidden" id="${answerFieldId}" value="${escapeHTML(saved)}"><div class="live-question-options">${(question.options || []).map((option, optionIndex) => `<button class="live-option-btn ${saved === String(optionIndex) ? 'selected' : ''}" onclick="document.getElementById('${answerFieldId}').value='${optionIndex}';submitLiveAnswer('${roundKey}','${question.id}','${answerFieldId}')">${escapeHTML(option || ('Option ' + (optionIndex + 1)))}</button>`).join('')}</div>`
-            : `<div class="form-group"><label class="form-label">Your Answer</label><input class="form-input" id="${answerFieldId}" type="text" value="${escapeHTML(saved)}" placeholder="Type your answer"></div>`;
-          return `
-            <div class="live-question-card">
-              <div class="live-question-title">Q${index + 1}. ${escapeHTML(question.prompt || 'Untitled question')}</div>
-              <div class="live-question-meta">${escapeHTML(question.type === 'mcq' ? 'MCQ' : 'Short answer')}</div>
-              ${options}
-              ${question.type !== 'mcq' ? `<div class="live-answer-row"><button class="submit-btn" onclick="submitLiveAnswer('${roundKey}','${question.id}','${answerFieldId}')">Submit Answer</button></div>` : ''}
-            </div>
-          `;
-        }).join('') : '<div class="live-question-card"><div class="live-question-title">No questions published yet</div><div class="live-question-meta">Open the admin panel and add the question set for this round.</div></div>'}
+      <div class="live-room-sub" style="margin-bottom:0.75rem">Time limit: ${escapeHTML(round.timeLimitMinutes || 0)} minutes · Your status: ${escapeHTML(tribute.status || 'pending')}</div>
+      <div class="status-chip" style="margin-bottom:1rem">
+        <span class="status-chip-label">Round Flow</span>
+        <div class="status-chip-value">${roundKey === 'r1' ? 'Mystery Image -> Architecture Leak -> MCQ Speed Quiz' : escapeHTML(round.subtitle || 'Live round')}</div>
       </div>
+      ${result ? `<div class="status-chip" style="margin-bottom:1rem"><span class="status-chip-label">Latest Result</span><div class="status-chip-value">Score ${escapeHTML(result.score)} / ${escapeHTML(result.total)}${result.breakdown ? ` · x${result.breakdown.imageMultiplier} image · x${result.breakdown.architectureMultiplier} architecture` : ''}</div></div>` : ''}
       <div class="live-answer-row" style="margin-top:1rem">
-        <button class="submit-btn" onclick="openQuizRoom('${roundKey}','${tribute.id}')">Enter Quiz Room</button>
+        <button class="submit-btn" onclick="openQuizRoom('${roundKey}','${tribute.id}')">${session.startedAt ? 'Resume Quiz Room' : 'Enter Quiz Room'}</button>
       </div>
       ${accessMode === 'tribute-id' ? '<div class="live-answer-row" style="margin-top:0.9rem"><button class="admin-btn admin-btn-danger" onclick="clearLiveJoinLink()">Disconnect Tribute ID</button></div>' : ''}
+    </div>
+  `;
+}
+
+function getQuizAttendanceList(roundKey) {
+  const sessions = state.live?.sessions?.[roundKey] || {};
+  const results = state.live?.results?.[roundKey] || {};
+  return Object.entries(sessions).map(([tributeId, session]) => {
+    const tribute = findTributeById(tributeId);
+    return {
+      tributeId,
+      name: tribute?.name || tributeId,
+      branch: tribute?.branch || '-',
+      status: tribute?.status || '-',
+      startedAt: session?.startedAt || '',
+      submittedAt: session?.submittedAt || '',
+      score: results?.[tributeId]?.score ?? '',
+      total: results?.[tributeId]?.total ?? '',
+      autoSubmitted: !!session?.autoSubmitted
+    };
+  }).sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)));
+}
+
+function resetQuizAttempt(roundKey, tributeId) {
+  if(!confirm(`Reset attempt for ${tributeId}? This will clear their quiz progress and score.`)) return;
+  const result = state.live?.results?.[roundKey]?.[tributeId] || null;
+  const tribute = state.tributes.find((t) => t.id === tributeId);
+  if(tribute && result) {
+    tribute.score = Math.max(0, (Number(tribute.score) || 0) - (Number(result.score) || 0));
+  }
+  if(state.live?.submissions?.[roundKey]) delete state.live.submissions[roundKey][tributeId];
+  if(state.live?.sessions?.[roundKey]) delete state.live.sessions[roundKey][tributeId];
+  if(state.live?.results?.[roundKey]) delete state.live.results[roundKey][tributeId];
+  saveState();
+  renderLiveRoundEditor();
+  renderTributeTable();
+  renderAdminLeaderboard();
+  renderPublicLeaderboard();
+  showToast(`Retake enabled for ${tributeId}.`, 'success');
+}
+
+function renderQuizAttendancePanel(roundKey) {
+  const panel = document.getElementById('quizAttendancePanel');
+  if(!panel) return;
+  const attendees = getQuizAttendanceList(roundKey);
+  if(!attendees.length) {
+    panel.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:0.72rem;color:var(--text-muted)">No one has attended this round yet.</div>';
+    return;
+  }
+  panel.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Tribute ID</th><th>Name</th><th>Branch</th><th>Status</th><th>Started</th><th>Submitted</th><th>Score</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${attendees.map((row) => `
+            <tr>
+              <td>${escapeHTML(row.tributeId)}</td>
+              <td>${escapeHTML(row.name)}</td>
+              <td>${escapeHTML(row.branch)}</td>
+              <td>${escapeHTML(row.status)}</td>
+              <td>${row.startedAt ? escapeHTML(new Date(row.startedAt).toLocaleString('en-IN')) : '-'}</td>
+              <td>${row.submittedAt ? escapeHTML(new Date(row.submittedAt).toLocaleString('en-IN')) : '-'}</td>
+              <td>${row.score !== '' ? escapeHTML(`${row.score}/${row.total}`) : '-'}</td>
+              <td><button class="admin-btn admin-btn-danger" onclick="resetQuizAttempt('${roundKey}','${row.tributeId}')">Allow Retake</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
   `;
 }
@@ -3470,6 +3557,8 @@ function renderQuizRoom() {
   quizRoomState.roundKey = roundKey;
   quizRoomState.tributeId = tribute.id;
   page.classList.add('open');
+
+  if(ensureRound1ThreePhaseQuestions(roundKey)) saveState();
 
   const round = getLiveRound(roundKey);
   const session = state.live?.sessions?.[roundKey]?.[tribute.id] || {};
