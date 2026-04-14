@@ -2257,6 +2257,7 @@ function loadState() {
 function saveState() {
   try { localStorage.setItem('hg_state', JSON.stringify(state)); } catch(e) {}
   queueCloudSync();
+  pushStateToCloud();
 }
 
 function generateTributeId(seed) {
@@ -2644,6 +2645,7 @@ function initFirebase() {
     auth = firebase.auth();
     auth.useDeviceLanguage();
     db = firebase.firestore();
+    try { db.enableNetwork(); } catch (e) {}
     try { analytics = firebase.analytics(); } catch (e) { analytics = null; }
     googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
@@ -2734,17 +2736,24 @@ async function pushStateToCloud() {
   try {
     await db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).set({
       ...state,
+      updatedAtClient: Date.now(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
   } catch (e) {
     console.error(e);
+    showToast('Cloud sync write failed. Check network or Firestore rules.', 'error');
   }
 }
 
 async function syncStateFromCloud() {
   if(!firebaseReady || !db) return;
   try {
-    const snap = await db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).get();
+    let snap;
+    try {
+      snap = await db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).get({ source: 'server' });
+    } catch (serverErr) {
+      snap = await db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).get();
+    }
     if(snap.exists) {
       const remote = snap.data() || {};
       state = {
@@ -2764,6 +2773,7 @@ async function syncStateFromCloud() {
     }
   } catch (e) {
     console.error(e);
+    showToast('Cloud sync read failed. Check network or Firestore rules.', 'error');
   }
 }
 
