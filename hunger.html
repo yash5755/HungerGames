@@ -1833,6 +1833,47 @@ function createDefaultLiveRound(roundKey, title, subtitle, instructions, eligibl
   };
 }
 
+function createRound1McqSet() {
+  return [
+    { prompt: 'Q1. 2, 6, 18, 54, ?', type: 'mcq', options: ['108', '162', '216', '324'], correctAnswer: '1', explanation: 'Geometric progression x3.' },
+    { prompt: 'Q2. Find the missing number: 5, 11, 23, 47, ?', type: 'mcq', options: ['91', '93', '95', '99'], correctAnswer: '2', explanation: 'Pattern is (x2)+1.' },
+    { prompt: 'Q3. If CAT = 24, DOG = 26, then BAT = ?', type: 'mcq', options: ['21', '22', '23', '24'], correctAnswer: '2', explanation: 'Mapped value for BAT is 23.' },
+    { prompt: 'Q4. Find the odd one out', type: 'mcq', options: ['121', '144', '169', '152'], correctAnswer: '3', explanation: '121, 144, 169 are perfect squares.' },
+    { prompt: 'Q5. A train crosses a pole in 10 seconds at 72 km/h. Length of train?', type: 'mcq', options: ['150 m', '180 m', '200 m', '220 m'], correctAnswer: '2', explanation: '72 km/h = 20 m/s, length = 20 x 10 = 200 m.' },
+    { prompt: 'Q6. If 3x + 2 = 11, x = ?', type: 'mcq', options: ['2', '3', '4', '5'], correctAnswer: '1', explanation: '3x = 9 so x = 3.' },
+    { prompt: 'Q7. Clock angle at 3:15?', type: 'mcq', options: ['0 deg', '7.5 deg', '15 deg', '30 deg'], correctAnswer: '1', explanation: 'Hour hand moves 0.5 deg/min, so 7.5 deg from 3.' },
+    { prompt: 'Q8. Find next: 1, 1, 2, 3, 5, 8, ?', type: 'mcq', options: ['11', '12', '13', '15'], correctAnswer: '2', explanation: 'Fibonacci sequence.' },
+    { prompt: 'Q9. If A=1, B=2... then CODE = ?', type: 'mcq', options: ['27', '25', '26', '27+? (Correct: 3+15+4+5 = 27)'], correctAnswer: '3', explanation: 'C+O+D+E = 27.' },
+    { prompt: 'Q10. Find missing: 9, 16, 25, 36, ?', type: 'mcq', options: ['45', '47', '49', '51'], correctAnswer: '2', explanation: 'Squares: 3^2, 4^2, 5^2, 6^2, 7^2.' },
+
+    { prompt: 'Q11. What does HTTP stand for?', type: 'mcq', options: ['HyperText Transfer Protocol', 'HighText Transfer Protocol', 'Hyper Transfer Text Process', 'None'], correctAnswer: '0', explanation: 'Standard web protocol expansion.' },
+    { prompt: 'Q12. Which is NOT a programming language?', type: 'mcq', options: ['Python', 'Java', 'HTML', 'C++'], correctAnswer: '2', explanation: 'HTML is a markup language.' },
+    { prompt: 'Q13. Which data structure uses FIFO?', type: 'mcq', options: ['Stack', 'Queue', 'Tree', 'Graph'], correctAnswer: '1', explanation: 'Queue follows First In First Out.' },
+    { prompt: 'Q14. Time complexity of binary search?', type: 'mcq', options: ['O(n)', 'O(log n)', 'O(n^2)', 'O(1)'], correctAnswer: '1', explanation: 'Binary search halves search space each step.' },
+    { prompt: 'Q15. Which is a cloud provider?', type: 'mcq', options: ['AWS', 'Linux', 'Git', 'Docker'], correctAnswer: '0', explanation: 'AWS is a cloud provider.' },
+    { prompt: 'Q16. What does SQL stand for?', type: 'mcq', options: ['Structured Query Language', 'Simple Query Logic', 'System Query Language', 'None'], correctAnswer: '0', explanation: 'Standard database query language.' },
+    { prompt: 'Q17. Which is used for version control?', type: 'mcq', options: ['Git', 'Linux', 'MySQL', 'Jenkins'], correctAnswer: '0', explanation: 'Git is a distributed VCS.' },
+    { prompt: 'Q18. Which is NOT an OS?', type: 'mcq', options: ['Windows', 'Linux', 'Oracle', 'macOS'], correctAnswer: '2', explanation: 'Oracle is a company/database brand, not an OS.' },
+    { prompt: 'Q19. Which layer is HTTP in?', type: 'mcq', options: ['Transport', 'Application', 'Network', 'Data Link'], correctAnswer: '1', explanation: 'HTTP is an application layer protocol.' },
+    { prompt: 'Q20. IP address version most used?', type: 'mcq', options: ['IPv4', 'IPv6', 'IPv5', 'IPv3'], correctAnswer: '0', explanation: 'IPv4 remains most widely used.' },
+
+    { prompt: 'Q21. All cats are animals. Some animals are black. Conclusion: Some cats are black?', type: 'mcq', options: ['True', 'False', 'Cannot be determined', 'Always true'], correctAnswer: '2', explanation: 'No direct overlap is guaranteed.' },
+    { prompt: 'Q22. If A > B and B > C, then:', type: 'mcq', options: ['A < C', 'A = C', 'A > C', 'None'], correctAnswer: '2', explanation: 'Transitive relation.' },
+    { prompt: 'Q23. Odd one out', type: 'mcq', options: ['CPU', 'RAM', 'SSD', 'Keyboard'], correctAnswer: '3', explanation: 'Keyboard is an input device, others are internal components.' },
+    { prompt: 'Q24. Mirror of 123?', type: 'mcq', options: ['321', '123', 'Depends on mirror', '123 reversed (321)'], correctAnswer: '3', explanation: 'Given answer set marks reversed form.' },
+    { prompt: 'Q25. If RED = 27, BLUE = ?', type: 'mcq', options: ['40', '42', '44', '40+? (B+L+U+E = 2+12+21+5 = 40)'], correctAnswer: '3', explanation: 'Letter-sum gives 40.' },
+
+    { prompt: 'Q26. Which is fastest storage?', type: 'mcq', options: ['HDD', 'SSD', 'Cache Memory', 'RAM'], correctAnswer: '2', explanation: 'Cache is fastest among listed options.' },
+    { prompt: 'Q27. Which is used for frontend?', type: 'mcq', options: ['React', 'Node.js', 'MongoDB', 'Express'], correctAnswer: '0', explanation: 'React is a frontend library.' },
+    { prompt: 'Q28. Binary of 5?', type: 'mcq', options: ['101', '110', '111', '100'], correctAnswer: '0', explanation: '5 in binary is 101.' },
+    { prompt: 'Q29. Which is NOT a database?', type: 'mcq', options: ['MySQL', 'MongoDB', 'PostgreSQL', 'React'], correctAnswer: '3', explanation: 'React is a frontend library.' },
+    { prompt: 'Q30. Which company created Java?', type: 'mcq', options: ['Microsoft', 'Apple', 'Sun Microsystems', 'Google'], correctAnswer: '2', explanation: 'Java was created at Sun Microsystems.' }
+  ].map((question, index) => ({
+    id: `q-r1-${index + 1}`,
+    ...question
+  }));
+}
+
 function createDefaultLiveState() {
   return {
     activeRound: 'r1',
@@ -1840,7 +1881,10 @@ function createDefaultLiveState() {
     sessions: {},
     results: {},
     rounds: {
-      r1: createDefaultLiveRound('r1', 'The Bloodbath', '3-Phased Digital Trial', 'Phase 1 Mystery Image (Multiplier), Phase 2 Architecture Leak (Multiplier), Phase 3 MCQ Speed Quiz. Final Score = MCQ x Image Multiplier x Architecture Multiplier. Top 60 advance.', 'registered', 45),
+      r1: {
+        ...createDefaultLiveRound('r1', 'The Bloodbath', '3-Phased Digital Trial', 'Round 1 The Bloodbath 3-Phased Digital Trial: 2 Multiplier Challenges (Mystery Image and Architecture Leak) followed by an MCQ Quiz. Top 60 Survivors.', 'registered', 45),
+        questions: createRound1McqSet()
+      },
       r2: createDefaultLiveRound('r2', 'The Tracker Jacker Trail', 'Digital Logical Labyrinth', 'Branching Google Form logic with gate checkpoints and dead-end traps.', 'qualified', 30),
       r3: createDefaultLiveRound('r3', 'The Mockingjay\'s Blueprint', 'Lightning Ideathon', 'Strategy, design, and pitch for the semifinalists.', 'r2', 40),
       r4: createDefaultLiveRound('r4', 'The Victor\'s Podium', 'Stump the Architect', 'Rapid-fire final showdown for the last five finalists.', 'r3', 20)
@@ -1851,13 +1895,17 @@ function createDefaultLiveState() {
 function mergeLiveState(remoteLive) {
   const base = createDefaultLiveState();
   const remoteRounds = remoteLive?.rounds || {};
+  const mergedR1 = { ...base.rounds.r1, ...(remoteRounds.r1 || {}) };
+  if(!Array.isArray(remoteRounds.r1?.questions) || !remoteRounds.r1.questions.length) {
+    mergedR1.questions = base.rounds.r1.questions;
+  }
   return {
     activeRound: remoteLive?.activeRound || base.activeRound,
     submissions: remoteLive?.submissions || base.submissions,
     sessions: remoteLive?.sessions || base.sessions,
     results: remoteLive?.results || base.results,
     rounds: {
-      r1: { ...base.rounds.r1, ...(remoteRounds.r1 || {}) },
+      r1: mergedR1,
       r2: { ...base.rounds.r2, ...(remoteRounds.r2 || {}) },
       r3: { ...base.rounds.r3, ...(remoteRounds.r3 || {}) },
       r4: { ...base.rounds.r4, ...(remoteRounds.r4 || {}) }
