@@ -539,6 +539,186 @@ nav {
 .form-msg.success { color:var(--green); }
 .form-msg.error { color:var(--crimson-bright); }
 
+.live-arena {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.live-room-card {
+  background: rgba(14,20,32,0.8);
+  border: 1px solid rgba(201,168,76,0.16);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 16px 38px rgba(0,0,0,0.16);
+}
+
+.live-room-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.live-room-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.35rem;
+  color: var(--gold);
+  margin-bottom: 0.3rem;
+}
+
+.live-room-sub {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.live-question-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.live-question-card {
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(8,14,24,0.72);
+}
+
+.live-question-title {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 0.82rem;
+  margin-bottom: 0.6rem;
+}
+
+.live-question-meta {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.live-question-options {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.live-option-btn {
+  width: 100%;
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(201,168,76,0.14);
+  background: rgba(12,18,30,0.9);
+  color: var(--parchment);
+  padding: 0.7rem 0.9rem;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+}
+
+.live-option-btn.selected {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.12);
+}
+
+.live-answer-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.85rem;
+}
+
+.live-answer-row .admin-btn,
+.live-answer-row .submit-btn {
+  width: auto;
+  padding-inline: 1rem;
+}
+
+.live-admin-wrap {
+  display: grid;
+  gap: 1rem;
+}
+
+.live-admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.live-admin-tab {
+  border: 1px solid rgba(201,168,76,0.18);
+  background: rgba(12,18,30,0.9);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.live-admin-tab.active {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.live-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.live-question-editor {
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 18px;
+  background: rgba(8,14,24,0.72);
+  padding: 1rem;
+}
+
+.live-question-editor-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.live-question-editor-title {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 0.78rem;
+}
+
+.live-question-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.live-question-grid .form-input,
+.live-question-grid .form-select {
+  font-size: 0.75rem;
+}
+
+.live-question-grid textarea.form-input {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.live-status-card {
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(8,14,24,0.72);
+}
+
 .round4-layout {
   display:grid;
   grid-template-columns:1fr auto;
@@ -1151,6 +1331,15 @@ footer {
   </div>
 </section>
 
+<!-- LIVE ARENA -->
+<section class="section" id="liveArena">
+  <span class="section-tag">Live Arena</span>
+  <h2 class="section-title">Attend the Current Round</h2>
+  <p class="section-subtitle">Published by organizers · Visible only to participants who qualify for the active round</p>
+  <div class="divider"><div class="divider-line"></div><div class="divider-icon">◆</div><div class="divider-line"></div></div>
+  <div class="live-arena" id="liveArenaContainer"></div>
+</section>
+
 <!-- REGISTER -->
 <section class="register-section" id="register">
   <span class="section-tag">Join the Games</span>
@@ -1347,6 +1536,23 @@ footer {
 
         <!-- ROUNDS CONTROL -->
         <div class="admin-section" id="tab-rounds">
+          <div class="live-admin-wrap">
+            <div class="live-status-card">
+              <div class="live-room-head" style="margin-bottom:0.75rem">
+                <div>
+                  <div class="live-room-title" style="font-size:1.05rem">Live Round Builder</div>
+                  <div class="live-room-sub">Create the quiz, rapid-fire set, or ideathon brief for the selected round, then publish it for qualified participants.</div>
+                </div>
+                <div class="live-admin-tabs">
+                  <button class="live-admin-tab active" onclick="selectLiveEditorRound('r1')">Round 1</button>
+                  <button class="live-admin-tab" onclick="selectLiveEditorRound('r2')">Round 2</button>
+                  <button class="live-admin-tab" onclick="selectLiveEditorRound('r3')">Round 3</button>
+                  <button class="live-admin-tab" onclick="selectLiveEditorRound('r4')">Round 4</button>
+                </div>
+              </div>
+              <div id="liveRoundEditor"></div>
+            </div>
+          </div>
           <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);margin-bottom:1.5rem;letter-spacing:0.1em">Active Phase Control</div>
           <div id="roundControlsContainer"></div>
         </div>
@@ -1463,7 +1669,9 @@ const FIREBASE_CONFIG = {
 };
 const FIREBASE_COLLECTION = 'hungerGames';
 const FIREBASE_DOC_ID = 'event-main';
+const LIVE_ROUND_ACCESS = { r1: 'registered', r2: 'qualified', r3: 'r2', r4: 'r3' };
 
+let liveEditorRound = 'r1';
 let state = loadState();
 let auth = null;
 let db = null;
@@ -1473,12 +1681,72 @@ let authUser = null;
 let firebaseReady = false;
 let syncTimer = null;
 
-function loadState() {
-  try {
-    const s = localStorage.getItem('hg_state');
-    if (s) return JSON.parse(s);
-  } catch(e) {}
+function createDefaultLiveRound(roundKey, title, subtitle, instructions, eligibleStatus, timeLimitMinutes) {
   return {
+    published: false,
+    title,
+    subtitle,
+    instructions,
+    eligibleStatus,
+    timeLimitMinutes,
+    questions: [],
+    responses: {}
+  };
+}
+
+function createDefaultLiveState() {
+  return {
+    activeRound: 'r1',
+    submissions: {},
+    rounds: {
+      r1: createDefaultLiveRound('r1', 'The Bloodbath', 'Digital Speed Trial', 'Two multiplier challenges followed by a live MCQ quiz.', 'registered', 45),
+      r2: createDefaultLiveRound('r2', 'The Tracker Jacker Trail', 'Digital Logical Labyrinth', 'Branching Google Form logic with gate checkpoints and dead-end traps.', 'qualified', 30),
+      r3: createDefaultLiveRound('r3', 'The Mockingjay\'s Blueprint', 'Lightning Ideathon', 'Strategy, design, and pitch for the semifinalists.', 'r2', 40),
+      r4: createDefaultLiveRound('r4', 'The Victor\'s Podium', 'Stump the Architect', 'Rapid-fire final showdown for the last five finalists.', 'r3', 20)
+    }
+  };
+}
+
+function mergeLiveState(remoteLive) {
+  const base = createDefaultLiveState();
+  const remoteRounds = remoteLive?.rounds || {};
+  return {
+    activeRound: remoteLive?.activeRound || base.activeRound,
+    submissions: remoteLive?.submissions || base.submissions,
+    rounds: {
+      r1: { ...base.rounds.r1, ...(remoteRounds.r1 || {}) },
+      r2: { ...base.rounds.r2, ...(remoteRounds.r2 || {}) },
+      r3: { ...base.rounds.r3, ...(remoteRounds.r3 || {}) },
+      r4: { ...base.rounds.r4, ...(remoteRounds.r4 || {}) }
+    }
+  };
+}
+
+function getLiveRoundKeyForPhase(phase) {
+  return { r1: 'r1', r2: 'r2', r3: 'r3', r4: 'r4' }[phase] || null;
+}
+
+function getRequiredAccessStatus(roundKey) {
+  return LIVE_ROUND_ACCESS[roundKey] || 'registered';
+}
+
+function canAttendLiveRound(status, roundKey) {
+  return !!roundKey && status === getRequiredAccessStatus(roundKey);
+}
+
+function createLiveQuestion() {
+  return {
+    id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    prompt: '',
+    type: 'mcq',
+    options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
+    correctIndex: 0,
+    explanation: ''
+  };
+}
+
+function loadState() {
+  const defaults = {
     config: {
       inst: 'AWS Cloud Club VVCE',
       venue: 'Main Auditorium',
@@ -1493,10 +1761,27 @@ function loadState() {
       r2link: '',
       waLink: ''
     },
+    live: createDefaultLiveState(),
     tributes: [],
     currentPhase: 'registration', // registration | r1 | r2 | r3 | r4 | ended
     victor: null
   };
+  try {
+    const s = localStorage.getItem('hg_state');
+    if (s) {
+      const parsed = JSON.parse(s);
+      return {
+        ...defaults,
+        ...parsed,
+        config: { ...defaults.config, ...(parsed.config || {}) },
+        live: mergeLiveState(parsed.live),
+        tributes: Array.isArray(parsed.tributes) ? parsed.tributes : [],
+        currentPhase: parsed.currentPhase || defaults.currentPhase,
+        victor: parsed.victor || null
+      };
+    }
+  } catch(e) {}
+  return defaults;
 }
 
 function saveState() {
@@ -1587,6 +1872,9 @@ function renderStudentStatusCard() {
   const nextStepMessage = profileComplete
     ? 'Profile complete. You are fully registered and will be moved through round updates by organizers.'
     : 'Complete USN, branch, year, and phone';
+  const liveRoundKey = getLiveRoundKeyForPhase(state.currentPhase);
+  const liveRound = liveRoundKey ? getLiveRound(liveRoundKey) : null;
+  const canAttend = liveRoundKey && liveRound?.published && canAttendLiveRound(tribute?.status, liveRoundKey);
   grid.innerHTML = `
     <div class="status-chip">
       <span class="status-chip-label">Tribute ID</span>
@@ -1603,6 +1891,10 @@ function renderStudentStatusCard() {
     <div class="status-chip">
       <span class="status-chip-label">Next Step</span>
       <div class="status-chip-value">${escapeHTML(nextStepMessage)}</div>
+    </div>
+    <div class="status-chip">
+      <span class="status-chip-label">Live Round</span>
+      <div class="status-chip-value">${liveRoundKey ? escapeHTML(liveRound?.title || phaseLabel(state.currentPhase)) : 'No round live yet'}${canAttend ? ' · You can attend now' : liveRound?.published ? ' · Not yet eligible' : ''}</div>
     </div>
   `;
 }
@@ -1625,6 +1917,20 @@ function initFirebase() {
     googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
     firebaseReady = true;
+
+    db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).onSnapshot((snap) => {
+      if(!snap.exists) return;
+      const remote = snap.data() || {};
+      state = {
+        ...state,
+        ...remote,
+        config: { ...state.config, ...(remote.config || {}) },
+        tributes: Array.isArray(remote.tributes) ? remote.tributes : state.tributes,
+        live: mergeLiveState(remote.live)
+      };
+      localStorage.setItem('hg_state', JSON.stringify(state));
+      rerenderAfterSync();
+    });
 
     auth.onAuthStateChanged(async (user) => {
       authUser = user || null;
@@ -1698,7 +2004,8 @@ async function syncStateFromCloud() {
         ...state,
         ...remote,
         config: { ...state.config, ...(remote.config || {}) },
-        tributes: Array.isArray(remote.tributes) ? remote.tributes : state.tributes
+        tributes: Array.isArray(remote.tributes) ? remote.tributes : state.tributes,
+        live: mergeLiveState(remote.live)
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
       rerenderAfterSync();
@@ -1714,12 +2021,14 @@ function rerenderAfterSync() {
   applyConfig();
   renderPublicLeaderboard();
   renderStudentStatusCard();
+  renderLiveArena();
   document.getElementById('currentPhaseLabel').textContent = phaseLabel(state.currentPhase);
   document.getElementById('heroTributes').textContent = state.tributes.length;
   if(document.getElementById('adminDashboard').style.display === 'block') {
     renderOverview();
     renderTributeTable();
     renderRoundControls();
+    renderLiveRoundEditor();
     renderAdminLeaderboard();
   }
 }
@@ -1973,7 +2282,7 @@ function verifyAdmin() {
   if(pwd === ADMIN_PWD) {
     document.getElementById('adminLoginSection').style.display='none';
     document.getElementById('adminDashboard').style.display='block';
-    loadConfig(); renderOverview(); renderTributeTable(); renderRoundControls(); renderAdminLeaderboard();
+    loadConfig(); renderOverview(); renderTributeTable(); renderRoundControls(); renderLiveRoundEditor(); renderAdminLeaderboard();
   } else {
     msg.className='form-msg error'; msg.textContent='Invalid password. The Capitol denies you access.';
   }
@@ -1986,6 +2295,7 @@ function switchTab(name) {
   });
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
+  if(name === 'rounds') renderLiveRoundEditor();
 }
 
 // ─── OVERVIEW ───
@@ -2182,6 +2492,281 @@ function renderPublicLeaderboard() {
   renderLeaderboardList(sorted, container);
 }
 
+function getLiveRound(roundKey) {
+  return state.live?.rounds?.[roundKey] || createDefaultLiveState().rounds[roundKey];
+}
+
+function selectLiveEditorRound(roundKey) {
+  liveEditorRound = roundKey;
+  renderLiveRoundEditor();
+}
+
+function renderLiveRoundEditor() {
+  const container = document.getElementById('liveRoundEditor');
+  if(!container) return;
+  const roundKey = liveEditorRound || state.currentPhase || 'r1';
+  const round = getLiveRound(roundKey);
+  const questions = Array.isArray(round.questions) ? round.questions : [];
+
+  document.querySelectorAll('.live-admin-tab').forEach((btn) => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase().includes(roundKey.slice(1)));
+  });
+
+  container.innerHTML = `
+    <div class="live-editor-grid">
+      <div class="live-status-card">
+        <div class="form-group">
+          <label class="form-label">Round Title</label>
+          <input class="form-input" id="liveRoundTitle" type="text" value="${escapeHTML(round.title || '')}" placeholder="Round title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Round Subtitle</label>
+          <input class="form-input" id="liveRoundSubtitle" type="text" value="${escapeHTML(round.subtitle || '')}" placeholder="Round subtitle">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instructions</label>
+          <textarea class="form-input" id="liveRoundInstructions" placeholder="Write the live instructions here" style="min-height:110px;resize:vertical">${escapeHTML(round.instructions || '')}</textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Eligible Status</label>
+            <select class="form-select" id="liveRoundEligible">
+              <option value="registered" ${round.eligibleStatus==='registered'?'selected':''}>Registered</option>
+              <option value="qualified" ${round.eligibleStatus==='qualified'?'selected':''}>Qualified</option>
+              <option value="r2" ${round.eligibleStatus==='r2'?'selected':''}>Semifinalist (R2)</option>
+              <option value="r3" ${round.eligibleStatus==='r3'?'selected':''}>Finalist (R3)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time Limit (minutes)</label>
+            <input class="form-input" id="liveRoundTime" type="number" min="1" value="${Number(round.timeLimitMinutes || 0)}">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.25rem">
+          <label class="form-label" style="display:flex;align-items:center;gap:0.6rem;min-height:auto;letter-spacing:0.1em;text-transform:none;font-family:'Space Grotesk',sans-serif;font-size:0.72rem">
+            <input id="liveRoundPublished" type="checkbox" ${round.published ? 'checked' : ''} style="accent-color:var(--gold)">
+            Publish this round to eligible participants
+          </label>
+        </div>
+        <div class="live-answer-row">
+          <button class="admin-btn admin-btn-primary" onclick="saveLiveRoundEditor()">Save Round</button>
+          <button class="admin-btn admin-btn-success" onclick="saveLiveRoundEditor(true)">Save & Publish</button>
+          <button class="admin-btn admin-btn-danger" onclick="saveLiveRoundEditor(false, true)">Unpublish</button>
+          <button class="admin-btn admin-btn-primary" onclick="addLiveQuestion()">+ Add Question</button>
+        </div>
+      </div>
+      <div class="live-status-card">
+        <div class="live-room-title" style="font-size:0.95rem;margin-bottom:0.2rem">Question Bank</div>
+        <div class="live-room-sub" style="margin-bottom:1rem">Each question can be MCQ or short-answer. Publish after loading the set you want.</div>
+        <div id="liveQuestionEditorList" class="live-question-grid"></div>
+      </div>
+    </div>
+    <div class="live-status-card" style="margin-top:1rem">
+      <div class="live-room-title" style="font-size:0.95rem;margin-bottom:0.2rem">Live Summary</div>
+      <div class="live-room-sub">Published: ${round.published ? 'Yes' : 'No'} · Eligible status: ${escapeHTML(round.eligibleStatus || 'registered')} · Time limit: ${escapeHTML(round.timeLimitMinutes || 0)} min</div>
+      <div style="margin-top:0.85rem;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--pale)">Questions configured: ${questions.length}</div>
+    </div>
+  `;
+
+  const list = document.getElementById('liveQuestionEditorList');
+  if(list) {
+    list.innerHTML = questions.map((question, index) => `
+      <div class="live-question-editor" data-index="${index}">
+        <div class="live-question-editor-head">
+          <div class="live-question-editor-title">Question ${index + 1}</div>
+          <button class="admin-btn admin-btn-danger" onclick="removeLiveQuestion(${index})">Remove</button>
+        </div>
+        <div class="live-question-grid">
+          <div class="form-group">
+            <label class="form-label">Question Prompt</label>
+            <textarea class="form-input live-q-prompt" style="min-height:80px;resize:vertical">${escapeHTML(question.prompt || '')}</textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Question Type</label>
+              <select class="form-select live-q-type">
+                <option value="mcq" ${question.type === 'mcq' ? 'selected' : ''}>MCQ</option>
+                <option value="text" ${question.type === 'text' ? 'selected' : ''}>Short Answer</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Correct Answer</label>
+              <input class="form-input live-q-answer" type="text" value="${escapeHTML(question.correctAnswer || '')}" placeholder="MCQ index or text answer">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Answer Options</label>
+            <div class="form-row" style="grid-template-columns:1fr 1fr;gap:0.75rem">
+              <input class="form-input live-q-option" type="text" value="${escapeHTML((question.options && question.options[0]) || '')}" placeholder="Option A">
+              <input class="form-input live-q-option" type="text" value="${escapeHTML((question.options && question.options[1]) || '')}" placeholder="Option B">
+              <input class="form-input live-q-option" type="text" value="${escapeHTML((question.options && question.options[2]) || '')}" placeholder="Option C">
+              <input class="form-input live-q-option" type="text" value="${escapeHTML((question.options && question.options[3]) || '')}" placeholder="Option D">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Answer Note</label>
+            <textarea class="form-input live-q-explanation" style="min-height:60px;resize:vertical" placeholder="Optional note for organizers">${escapeHTML(question.explanation || '')}</textarea>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function addLiveQuestion() {
+  const round = getLiveRound(liveEditorRound);
+  round.questions = Array.isArray(round.questions) ? round.questions : [];
+  round.questions.push(createLiveQuestion());
+  saveState();
+  renderLiveRoundEditor();
+}
+
+function removeLiveQuestion(index) {
+  const round = getLiveRound(liveEditorRound);
+  round.questions = (round.questions || []).filter((_, questionIndex) => questionIndex !== index);
+  saveState();
+  renderLiveRoundEditor();
+}
+
+function saveLiveRoundEditor(forcePublish, forceUnpublish) {
+  const roundKey = liveEditorRound || 'r1';
+  const round = getLiveRound(roundKey);
+  const editor = document.getElementById('liveRoundEditor');
+  if(!editor) return;
+
+  round.title = document.getElementById('liveRoundTitle').value.trim() || round.title;
+  round.subtitle = document.getElementById('liveRoundSubtitle').value.trim() || round.subtitle;
+  round.instructions = document.getElementById('liveRoundInstructions').value.trim();
+  round.eligibleStatus = document.getElementById('liveRoundEligible').value;
+  round.timeLimitMinutes = parseInt(document.getElementById('liveRoundTime').value) || round.timeLimitMinutes || 0;
+  if(typeof forcePublish === 'boolean') round.published = forcePublish;
+  else if(typeof forceUnpublish === 'boolean' && forceUnpublish) round.published = false;
+  else round.published = document.getElementById('liveRoundPublished').checked;
+
+  round.questions = [...editor.querySelectorAll('.live-question-editor')].map((card) => {
+    const prompt = card.querySelector('.live-q-prompt').value.trim();
+    const type = card.querySelector('.live-q-type').value;
+    const correctAnswer = card.querySelector('.live-q-answer').value.trim();
+    const explanation = card.querySelector('.live-q-explanation').value.trim();
+    const options = [...card.querySelectorAll('.live-q-option')].map(input => input.value.trim()).filter(Boolean);
+    return {
+      id: card.dataset.index ? `q-${roundKey}-${card.dataset.index}` : createLiveQuestion().id,
+      prompt,
+      type,
+      options,
+      correctAnswer,
+      explanation
+    };
+  });
+
+  state.live = { ...state.live, rounds: { ...state.live.rounds, [roundKey]: round } };
+  saveState();
+  renderLiveRoundEditor();
+  renderLiveArena();
+  showToast(round.published ? `${round.title} is now live` : `${round.title} saved`, 'success');
+}
+
+function submitLiveAnswer(roundKey, questionId, fieldId) {
+  const tribute = getSignedInTribute();
+  if(!tribute) { showToast('Sign in first to submit answers.', 'error'); return; }
+  const input = document.getElementById(fieldId);
+  const answer = (input?.value || '').trim();
+  if(!answer) { showToast('Choose or enter an answer first.', 'error'); return; }
+  state.live = state.live || createDefaultLiveState();
+  state.live.submissions = state.live.submissions || {};
+  state.live.submissions[roundKey] = state.live.submissions[roundKey] || {};
+  state.live.submissions[roundKey][tribute.id] = state.live.submissions[roundKey][tribute.id] || {};
+  state.live.submissions[roundKey][tribute.id][questionId] = {
+    answer,
+    submittedAt: new Date().toISOString()
+  };
+  saveState();
+  renderLiveArena();
+  showToast('Answer submitted to the live round.', 'success');
+}
+
+function renderLiveArena() {
+  const container = document.getElementById('liveArenaContainer');
+  const section = document.getElementById('liveArena');
+  if(!container || !section) return;
+
+  const roundKey = getLiveRoundKeyForPhase(state.currentPhase);
+  if(!roundKey) {
+    section.style.display = 'none';
+    return;
+  }
+
+  const round = getLiveRound(roundKey);
+  section.style.display = 'block';
+
+  if(!round.published) {
+    container.innerHTML = `
+      <div class="live-room-card">
+        <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
+        <div class="live-room-sub">Waiting for organizers to publish this round.</div>
+      </div>
+    `;
+    return;
+  }
+
+  const tribute = getSignedInTribute();
+  if(!tribute) {
+    container.innerHTML = `
+      <div class="live-room-card">
+        <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
+        <div class="live-room-sub">Sign in with Google to attend the live round when your status qualifies.</div>
+      </div>
+    `;
+    return;
+  }
+
+  if(!canAttendLiveRound(tribute.status, roundKey)) {
+    container.innerHTML = `
+      <div class="live-room-card">
+        <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
+        <div class="live-room-sub">This round is live, but your current status (${escapeHTML(tribute.status || 'pending')}) does not qualify yet.</div>
+      </div>
+    `;
+    return;
+  }
+
+  const questions = Array.isArray(round.questions) ? round.questions : [];
+  const liveResponseState = state.live?.submissions?.[roundKey]?.[tribute.id] || {};
+  container.innerHTML = `
+    <div class="live-room-card">
+      <div class="live-room-head">
+        <div>
+          <div class="live-room-title">${escapeHTML(round.title || 'Live Round')}</div>
+          <div class="live-room-sub">${escapeHTML(round.subtitle || '')}</div>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div>Accessible now</div>
+      </div>
+      <div class="status-chip" style="margin-bottom:1rem">
+        <span class="status-chip-label">Instructions</span>
+        <div class="status-chip-value">${escapeHTML(round.instructions || 'No instructions published yet.')}</div>
+      </div>
+      <div class="live-room-sub" style="margin-bottom:0.75rem">Time limit: ${escapeHTML(round.timeLimitMinutes || 0)} minutes · Questions: ${questions.length} · Your status: ${escapeHTML(tribute.status || 'pending')}</div>
+      <div class="live-question-list">
+        ${questions.length ? questions.map((question, index) => {
+          const saved = liveResponseState[question.id]?.answer || '';
+          const answerFieldId = `live-answer-${roundKey}-${index}`;
+          const options = question.type === 'mcq'
+            ? `<input type="hidden" id="${answerFieldId}" value="${escapeHTML(saved)}"><div class="live-question-options">${(question.options || []).map((option, optionIndex) => `<button class="live-option-btn ${saved === String(optionIndex) ? 'selected' : ''}" onclick="document.getElementById('${answerFieldId}').value='${optionIndex}';submitLiveAnswer('${roundKey}','${question.id}','${answerFieldId}')">${escapeHTML(option || ('Option ' + (optionIndex + 1)))}</button>`).join('')}</div>`
+            : `<div class="form-group"><label class="form-label">Your Answer</label><input class="form-input" id="${answerFieldId}" type="text" value="${escapeHTML(saved)}" placeholder="Type your answer"></div>`;
+          return `
+            <div class="live-question-card">
+              <div class="live-question-title">Q${index + 1}. ${escapeHTML(question.prompt || 'Untitled question')}</div>
+              <div class="live-question-meta">${escapeHTML(question.type === 'mcq' ? 'MCQ' : 'Short answer')}</div>
+              ${options}
+              ${question.type !== 'mcq' ? `<div class="live-answer-row"><button class="submit-btn" onclick="submitLiveAnswer('${roundKey}','${question.id}','${answerFieldId}')">Submit Answer</button></div>` : ''}
+            </div>
+          `;
+        }).join('') : '<div class="live-question-card"><div class="live-question-title">No questions published yet</div><div class="live-question-meta">Open the admin panel and add the question set for this round.</div></div>'}
+      </div>
+    </div>
+  `;
+}
+
 // ─── CONFIG ───
 function loadConfig() {
   const c = state.config;
@@ -2286,6 +2871,7 @@ function showToast(msg, type='success') {
 // ─── INIT ───
 applyConfig();
 renderPublicLeaderboard();
+renderLiveArena();
 document.getElementById('currentPhaseLabel').textContent = phaseLabel(state.currentPhase);
 document.getElementById('heroTributes').textContent = state.tributes.length;
 updateAuthUI();
