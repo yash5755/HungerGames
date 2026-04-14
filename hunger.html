@@ -1877,6 +1877,7 @@ const LIVE_ROUND_ACCESS = { r1: 'registered', r2: 'qualified', r3: 'r2', r4: 'r3
 
 let liveEditorRound = 'r1';
 let state = loadState();
+deduplicateTributesbyUID();
 rebuildUidToTributeIdMapping();
 let auth = null;
 let db = null;
@@ -2288,6 +2289,35 @@ function rebuildUidToTributeIdMapping() {
   } catch(e) {}
 }
 
+function deduplicateTributesbyUID() {
+  const byUID = {};
+  (state.tributes || []).forEach(t => {
+    if(!t.uid) return;
+    if(!byUID[t.uid]) {
+      byUID[t.uid] = [t];
+    } else {
+      byUID[t.uid].push(t);
+    }
+  });
+  
+  let removed = false;
+  Object.keys(byUID).forEach(uid => {
+    if(byUID[uid].length > 1) {
+      const sorted = byUID[uid].sort((a, b) => {
+        const scoreA = (a.status === 'registered' ? 10 : a.status === 'qualified' ? 5 : 0) + (a.usn ? 2 : 0);
+        const scoreB = (b.status === 'registered' ? 10 : b.status === 'qualified' ? 5 : 0) + (b.usn ? 2 : 0);
+        return scoreB - scoreA;
+      });
+      const keep = sorted[0];
+      for(let i = 1; i < sorted.length; i++) {
+        state.tributes = state.tributes.filter(t => t.id !== sorted[i].id);
+        removed = true;
+      }
+    }
+  });
+  return removed;
+}
+
 function findTributeByUid(uid) {
   if(!uid) return null;
   const mappedId = getTributeIdFromUidMapping(uid);
@@ -2562,6 +2592,7 @@ function initFirebase() {
         live: mergeLiveState(remote.live)
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
+      if(deduplicateTributesbyUID()) queueCloudSync();
       rebuildUidToTributeIdMapping();
       rerenderAfterSync();
     });
@@ -2642,6 +2673,7 @@ async function syncStateFromCloud() {
         live: mergeLiveState(remote.live)
       };
       localStorage.setItem('hg_state', JSON.stringify(state));
+      if(deduplicateTributesbyUID()) queueCloudSync();
       rebuildUidToTributeIdMapping();
       rerenderAfterSync();
     } else {
@@ -2817,11 +2849,15 @@ async function signInWithGoogle() {
     const result = await auth.signInWithPopup(googleProvider);
     const user = result?.user || auth.currentUser;
     if(!user) throw new Error('No user returned from Firebase sign-in');
-    const tribute = getOrCreateTributeDraft(user);
+    
+    authUser = user;
+    await syncStateFromCloud();
+    
+    const tribute = getSignedInTribute() || getOrCreateTributeDraft(user);
     saveState();
     document.getElementById('tributeIdDisplay').textContent = tribute.id;
     document.getElementById('successModal').classList.add('open');
-    showToast(`Tribute ID assigned: ${tribute.id}`, 'success');
+    showToast(`Tribute ID: ${tribute.id}`, 'success');
   } catch (e) {
     console.error(e);
     if(e?.code === 'auth/popup-blocked' || e?.code === 'auth/cancelled-popup-request') {
