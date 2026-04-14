@@ -1815,6 +1815,7 @@ let syncTimer = null;
 let quizRoomState = {
   roundKey: null,
   tributeId: null,
+  phaseKey: null,
   questionIndex: 0,
   timerHandle: null,
   isSubmitted: false
@@ -2001,6 +2002,67 @@ function ensureRound1ThreePhaseQuestions(roundKey) {
     return true;
   }
   return false;
+}
+
+function getRound1PhaseOrder() {
+  return ['phase1', 'phase2', 'phase3'];
+}
+
+function getRound1PhaseInfo(phaseKey) {
+  const phaseMap = {
+    phase1: {
+      title: 'PHASE 1 - Mystery Image',
+      subtitle: 'Multiplier Challenge',
+      concept: 'Show a blurred, zoomed, or partial image and ask participants to identify it.',
+      scoring: '0-2 correct -> x1 | 3-4 correct -> x1.5 | 5 correct -> x2',
+      section: 'phase1'
+    },
+    phase2: {
+      title: 'PHASE 2 - Architecture Leak',
+      subtitle: 'Multiplier Challenge',
+      concept: 'Participants see a system diagram and answer logic-based architecture questions.',
+      scoring: '0-1 correct -> x1 | 2-3 correct -> x1.5 | 4+ correct -> x2',
+      section: 'phase2'
+    },
+    phase3: {
+      title: 'PHASE 3 - MCQ Speed Quiz',
+      subtitle: 'Final speed round',
+      concept: '20-30 rapid MCQs on aptitude, tech basics, logic, and pattern recognition.',
+      scoring: 'Speed + accuracy decide the MCQ score before multipliers are applied.',
+      section: 'phase3'
+    }
+  };
+  return phaseMap[phaseKey] || phaseMap.phase3;
+}
+
+function getRoundPhaseQuestions(roundKey, phaseKey) {
+  const round = getLiveRound(roundKey);
+  const questions = Array.isArray(round.questions) ? round.questions : [];
+  if(roundKey === 'r1') {
+    return questions.filter((question) => String(question.section || '').toLowerCase() === String(phaseKey || 'phase3').toLowerCase());
+  }
+  return questions;
+}
+
+function getCurrentQuizPhase(roundKey) {
+  if(roundKey !== 'r1') return 'quiz';
+  const sessionPhase = state.live?.sessions?.[roundKey]?.[quizRoomState.tributeId || '']?.phaseKey;
+  return sessionPhase || quizRoomState.phaseKey || 'phase1';
+}
+
+function updateRound1Phase(nextPhase) {
+  const roundKey = quizRoomState.roundKey;
+  const tributeId = quizRoomState.tributeId;
+  if(roundKey !== 'r1' || !tributeId) return;
+  state.live = state.live || createDefaultLiveState();
+  state.live.sessions = state.live.sessions || {};
+  state.live.sessions[roundKey] = state.live.sessions[roundKey] || {};
+  state.live.sessions[roundKey][tributeId] = state.live.sessions[roundKey][tributeId] || {};
+  state.live.sessions[roundKey][tributeId].phaseKey = nextPhase;
+  state.live.sessions[roundKey][tributeId].phaseUpdatedAt = new Date().toISOString();
+  quizRoomState.phaseKey = nextPhase;
+  quizRoomState.questionIndex = 0;
+  saveState();
 }
 
 function createDefaultLiveState() {
@@ -2251,6 +2313,7 @@ function openQuizRoom(roundKey, tribute) {
   if(!tributeId) return;
   quizRoomState.roundKey = roundKey;
   quizRoomState.tributeId = tributeId;
+  quizRoomState.phaseKey = roundKey === 'r1' ? (state.live?.sessions?.[roundKey]?.[tributeId]?.phaseKey || 'phase1') : null;
   quizRoomState.questionIndex = 0;
   quizRoomState.isSubmitted = false;
   location.hash = '#quiz-room';
@@ -2264,6 +2327,7 @@ function exitQuizRoom() {
   }
   quizRoomState.roundKey = null;
   quizRoomState.tributeId = null;
+  quizRoomState.phaseKey = null;
   quizRoomState.questionIndex = 0;
   quizRoomState.isSubmitted = false;
   const page = document.getElementById('quizRoomPage');
@@ -3346,29 +3410,34 @@ function startQuizRoom() {
   state.live.sessions[roundKey] = state.live.sessions[roundKey] || {};
   const session = state.live.sessions[roundKey][tributeId] || {};
   if(!session.startedAt) session.startedAt = new Date().toISOString();
+  if(roundKey === 'r1' && !session.phaseKey) session.phaseKey = 'phase1';
   state.live.sessions[roundKey][tributeId] = session;
+  if(roundKey === 'r1') quizRoomState.phaseKey = session.phaseKey || 'phase1';
   saveState();
   renderQuizRoom();
 }
 
 function moveQuizQuestion(step) {
-  const round = getLiveRound(quizRoomState.roundKey);
-  const total = (round.questions || []).length;
+  const phaseKey = getCurrentQuizPhase(quizRoomState.roundKey);
+  const questions = getRoundPhaseQuestions(quizRoomState.roundKey, phaseKey);
+  const total = questions.length;
   quizRoomState.questionIndex = Math.max(0, Math.min(total - 1, quizRoomState.questionIndex + step));
   renderQuizRoom();
 }
 
 function selectQuizOption(optionIndex) {
-  const round = getLiveRound(quizRoomState.roundKey);
-  const question = (round.questions || [])[quizRoomState.questionIndex];
+  const phaseKey = getCurrentQuizPhase(quizRoomState.roundKey);
+  const questions = getRoundPhaseQuestions(quizRoomState.roundKey, phaseKey);
+  const question = questions[quizRoomState.questionIndex];
   if(!question) return;
   setQuizAnswer(quizRoomState.roundKey, quizRoomState.tributeId, question.id, String(optionIndex));
   renderQuizRoom();
 }
 
 function saveQuizTextAnswer() {
-  const round = getLiveRound(quizRoomState.roundKey);
-  const question = (round.questions || [])[quizRoomState.questionIndex];
+  const phaseKey = getCurrentQuizPhase(quizRoomState.roundKey);
+  const questions = getRoundPhaseQuestions(quizRoomState.roundKey, phaseKey);
+  const question = questions[quizRoomState.questionIndex];
   if(!question) return;
   const input = document.getElementById('quizTextAnswer');
   const value = (input?.value || '').trim();
@@ -3376,7 +3445,7 @@ function saveQuizTextAnswer() {
   showToast('Answer saved.', 'success');
 }
 
-function gradeQuiz(roundKey, tributeId) {
+function gradeQuiz(roundKey, tributeId, sectionFilter = null) {
   const round = getLiveRound(roundKey);
   const questions = round.questions || [];
   let score = 0;
@@ -3387,6 +3456,10 @@ function gradeQuiz(roundKey, tributeId) {
   let phase2Total = 0;
   let phase3Total = 0;
   questions.forEach((question) => {
+    const section = String(question.section || '').toLowerCase();
+    if(sectionFilter && section !== String(sectionFilter).toLowerCase()) {
+      return;
+    }
     const raw = String(getQuizAnswerFor(roundKey, tributeId, question.id) || '').trim();
     let matched = false;
     if(question.type === 'mcq') {
@@ -3417,7 +3490,6 @@ function gradeQuiz(roundKey, tributeId) {
     }
 
     if(roundKey === 'r1') {
-      const section = String(question.section || '').toLowerCase();
       if(section === 'phase1') {
         phase1Total += 1;
         if(matched) phase1Correct += 1;
@@ -3435,9 +3507,10 @@ function gradeQuiz(roundKey, tributeId) {
     const imageMultiplier = phase1Correct <= 2 ? 1 : phase1Correct <= 4 ? 1.5 : 2;
     const architectureMultiplier = phase2Correct <= 1 ? 1 : phase2Correct <= 3 ? 1.5 : 2;
     const finalScore = Number((phase3Correct * imageMultiplier * architectureMultiplier).toFixed(2));
+    const phaseTotal = sectionFilter === 'phase1' ? phase1Total : sectionFilter === 'phase2' ? phase2Total : phase3Total;
     return {
       score: finalScore,
-      total: phase3Total,
+      total: sectionFilter ? phaseTotal : phase3Total,
       breakdown: {
         phase1Correct,
         phase1Total,
@@ -3453,6 +3526,47 @@ function gradeQuiz(roundKey, tributeId) {
   }
 
   return { score, total: questions.length };
+}
+
+function submitCurrentQuizPhase() {
+  const roundKey = quizRoomState.roundKey;
+  const tributeId = quizRoomState.tributeId;
+  if(!roundKey || !tributeId) return;
+
+  if(roundKey !== 'r1') {
+    finalizeQuizRoom(false);
+    return;
+  }
+
+  const phaseKey = getCurrentQuizPhase(roundKey);
+  const phaseResult = gradeQuiz(roundKey, tributeId, phaseKey);
+  state.live = state.live || createDefaultLiveState();
+  state.live.results = state.live.results || {};
+  state.live.results[roundKey] = state.live.results[roundKey] || {};
+  state.live.results[roundKey][tributeId] = state.live.results[roundKey][tributeId] || {};
+  state.live.results[roundKey][tributeId].phaseResults = state.live.results[roundKey][tributeId].phaseResults || {};
+  state.live.results[roundKey][tributeId].phaseResults[phaseKey] = phaseResult;
+  state.live.sessions = state.live.sessions || {};
+  state.live.sessions[roundKey] = state.live.sessions[roundKey] || {};
+  state.live.sessions[roundKey][tributeId] = state.live.sessions[roundKey][tributeId] || {};
+
+  if(phaseKey === 'phase1') {
+    updateRound1Phase('phase2');
+    saveState();
+    renderQuizRoom();
+    showToast('Phase 1 submitted. Move to Architecture Leak.', 'success');
+    return;
+  }
+
+  if(phaseKey === 'phase2') {
+    updateRound1Phase('phase3');
+    saveState();
+    renderQuizRoom();
+    showToast('Phase 2 submitted. Proceed to MCQ Speed Quiz.', 'success');
+    return;
+  }
+
+  finalizeQuizRoom(false);
 }
 
 function finalizeQuizRoom(autoSubmit) {
@@ -3563,11 +3677,15 @@ function renderQuizRoom() {
   const round = getLiveRound(roundKey);
   const session = state.live?.sessions?.[roundKey]?.[tribute.id] || {};
   const submitted = !!session.submittedAt;
-  const questions = Array.isArray(round.questions) ? round.questions : [];
+  const phaseKey = roundKey === 'r1' ? (session.phaseKey || quizRoomState.phaseKey || 'phase1') : null;
+  const phaseInfo = roundKey === 'r1' ? getRound1PhaseInfo(phaseKey) : null;
+  const questions = roundKey === 'r1' ? getRoundPhaseQuestions(roundKey, phaseKey) : (Array.isArray(round.questions) ? round.questions : []);
   const total = questions.length;
 
   title.textContent = round.title || 'Live Quiz Room';
-  meta.textContent = `${round.subtitle || ''} · Tribute ${tribute.id} · Status ${tribute.status}`;
+  meta.textContent = roundKey === 'r1'
+    ? `${round.subtitle || ''} · ${phaseInfo.title} · Tribute ${tribute.id} · Status ${tribute.status}`
+    : `${round.subtitle || ''} · Tribute ${tribute.id} · Status ${tribute.status}`;
   ensureQuizTimer(roundKey, tribute.id, round.timeLimitMinutes, submitted);
 
   if(!round.published) {
@@ -3595,8 +3713,8 @@ function renderQuizRoom() {
 
   if(!session.startedAt) {
     body.innerHTML = `
-      <div class="quiz-question">${escapeHTML(round.instructions || 'Read the instructions and start when ready.')}</div>
-      <div class="quiz-meta">Questions: ${total} · Time limit: ${round.timeLimitMinutes || 0} minutes</div>
+      <div class="quiz-question">${escapeHTML(roundKey === 'r1' ? phaseInfo.title : 'Read the instructions and start when ready.')}</div>
+      ${roundKey === 'r1' ? `<div class="quiz-meta" style="margin-top:0.5rem">${escapeHTML(phaseInfo.subtitle)} · ${escapeHTML(phaseInfo.concept)}<br>${escapeHTML(phaseInfo.scoring)}</div>` : `<div class="quiz-meta">Questions: ${total} · Time limit: ${round.timeLimitMinutes || 0} minutes</div>`}
       <div class="quiz-actions">
         <button class="submit-btn" onclick="startQuizRoom()">Start Quiz</button>
         <button class="admin-btn admin-btn-primary" onclick="exitQuizRoom()">Cancel</button>
@@ -3606,7 +3724,7 @@ function renderQuizRoom() {
   }
 
   if(!total) {
-    body.innerHTML = `<div class="quiz-question">No questions are published yet for this round.</div><div class="quiz-actions"><button class="admin-btn admin-btn-primary" onclick="exitQuizRoom()">Go Back</button></div>`;
+    body.innerHTML = `<div class="quiz-question">No questions are published yet for this phase.</div><div class="quiz-actions"><button class="admin-btn admin-btn-primary" onclick="exitQuizRoom()">Go Back</button></div>`;
     return;
   }
 
@@ -3615,13 +3733,15 @@ function renderQuizRoom() {
   const q = questions[index];
   const answer = getQuizAnswerFor(roundKey, tribute.id, q.id);
   const progressPct = Math.round(((index + 1) / total) * 100);
-  const sectionLabel = q.section === 'phase1'
-    ? 'Phase 1: Mystery Image (Multiplier 1)'
-    : q.section === 'phase2'
-      ? 'Phase 2: Architecture Leak (Multiplier 2)'
-      : q.section === 'phase3'
-        ? 'Phase 3: MCQ Speed Quiz'
-        : 'Question';
+  const sectionLabel = roundKey === 'r1'
+    ? `${phaseInfo.title}`
+    : q.section === 'phase1'
+      ? 'Phase 1: Mystery Image (Multiplier 1)'
+      : q.section === 'phase2'
+        ? 'Phase 2: Architecture Leak (Multiplier 2)'
+        : q.section === 'phase3'
+          ? 'Phase 3: MCQ Speed Quiz'
+          : 'Question';
 
   const questionBody = q.type === 'mcq'
     ? `<div class="quiz-options">${(q.options || []).map((opt, i) => `<button class="quiz-option ${answer === String(i) ? 'active' : ''}" onclick="selectQuizOption(${i})">${escapeHTML(opt || ('Option ' + (i + 1)))}</button>`).join('')}</div>`
@@ -3629,6 +3749,7 @@ function renderQuizRoom() {
 
   body.innerHTML = `
     <div class="quiz-meta">${sectionLabel} · Question ${index + 1} of ${total}</div>
+    ${roundKey === 'r1' ? `<div class="quiz-question" style="margin-top:0.75rem">${escapeHTML(phaseInfo.concept)}</div><div class="quiz-meta" style="margin-top:0.5rem">${escapeHTML(phaseInfo.scoring)}</div>` : ''}
     <div class="quiz-progress">
       <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${progressPct}%"></div></div>
     </div>
@@ -3637,7 +3758,7 @@ function renderQuizRoom() {
     <div class="quiz-actions">
       <button class="admin-btn admin-btn-primary" onclick="moveQuizQuestion(-1)" ${index === 0 ? 'disabled' : ''}>Previous</button>
       <button class="admin-btn admin-btn-primary" onclick="moveQuizQuestion(1)" ${index === total - 1 ? 'disabled' : ''}>Next</button>
-      <button class="admin-btn admin-btn-success" onclick="finalizeQuizRoom(false)">Submit Quiz</button>
+      <button class="admin-btn admin-btn-success" onclick="submitCurrentQuizPhase()">${roundKey === 'r1' && phaseKey !== 'phase3' ? 'Submit Phase' : 'Submit Quiz'}</button>
     </div>
   `;
 }
