@@ -1877,6 +1877,7 @@ const LIVE_ROUND_ACCESS = { r1: 'registered', r2: 'qualified', r3: 'r2', r4: 'r3
 
 let liveEditorRound = 'r1';
 let state = loadState();
+rebuildUidToTributeIdMapping();
 let auth = null;
 let db = null;
 let googleProvider = null;
@@ -2357,6 +2358,7 @@ function getSignedInTribute() {
   if(tribute) {
     if(!tribute.uid) tribute.uid = authUser.uid;
     if(!tribute.email && authUser.email) tribute.email = String(authUser.email).toLowerCase();
+    saveTributeIdToUidMapping(authUser.uid, tribute.id);
   }
   return tribute;
 }
