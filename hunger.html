@@ -1874,6 +1874,115 @@ function createRound1McqSet() {
   }));
 }
 
+function createRound1MysteryImageSet() {
+  return [
+    {
+      id: 'q-r1-m1-1',
+      section: 'phase1',
+      prompt: 'Mystery Image Q1: Blurred AWS logo. Identify this cloud service provider.',
+      type: 'mcq',
+      options: ['AWS', 'Azure', 'GCP', 'DigitalOcean'],
+      correctAnswer: '0',
+      explanation: 'This blurred logo corresponds to AWS.'
+    },
+    {
+      id: 'q-r1-m1-2',
+      section: 'phase1',
+      prompt: 'Mystery Image Q2: Zoomed image of a code snippet. What language is this?',
+      type: 'mcq',
+      options: ['Python', 'Java', 'JavaScript', 'C++'],
+      correctAnswer: '0',
+      explanation: 'Selected sample corresponds to Python syntax.'
+    },
+    {
+      id: 'q-r1-m1-3',
+      section: 'phase1',
+      prompt: 'Mystery Image Q3: Partial UI of an app. Identify the platform.',
+      type: 'mcq',
+      options: ['Web App Dashboard', 'Desktop IDE', 'Command Line Tool', 'Smartwatch App'],
+      correctAnswer: '0',
+      explanation: 'UI fragment maps to a web dashboard platform.'
+    },
+    {
+      id: 'q-r1-m1-4',
+      section: 'phase1',
+      prompt: 'Mystery Image Q4: Cropped icon with cloud + lambda symbol. What service model is this closest to?',
+      type: 'mcq',
+      options: ['Serverless Compute', 'Virtual Machine Hosting', 'Block Storage', 'DNS Management'],
+      correctAnswer: '0',
+      explanation: 'Lambda-style icon indicates serverless compute.'
+    },
+    {
+      id: 'q-r1-m1-5',
+      section: 'phase1',
+      prompt: 'Mystery Image Q5: Blurred padlock + browser bar. Which category best fits?',
+      type: 'mcq',
+      options: ['Web Security / HTTPS', 'Container Orchestration', 'Data Warehousing', 'Game Engine'],
+      correctAnswer: '0',
+      explanation: 'Padlock + browser bar indicates HTTPS/web security.'
+    }
+  ];
+}
+
+function createRound1ArchitectureLeakSet() {
+  return [
+    {
+      id: 'q-r1-m2-1',
+      section: 'phase2',
+      prompt: 'Architecture Leak Q1: User -> Load Balancer -> App Server -> Database. What is the role of the Load Balancer?',
+      type: 'mcq',
+      options: ['Distribute traffic across servers', 'Store user passwords', 'Compile source code', 'Encrypt only database rows'],
+      correctAnswer: '0',
+      explanation: 'Load balancer distributes incoming traffic.'
+    },
+    {
+      id: 'q-r1-m2-2',
+      section: 'phase2',
+      prompt: 'Architecture Leak Q2: In the same system, what happens if the Database fails and no replica exists?',
+      type: 'mcq',
+      options: ['Read/write operations fail for data-dependent requests', 'Only CSS fails to load', 'Load balancer automatically stores data', 'Frontend compiles itself'],
+      correctAnswer: '0',
+      explanation: 'Without DB availability, data operations fail.'
+    },
+    {
+      id: 'q-r1-m2-3',
+      section: 'phase2',
+      prompt: 'Architecture Leak Q3: Which component typically handles horizontal scaling of app instances?',
+      type: 'mcq',
+      options: ['Auto Scaling Group / Orchestrator', 'Single browser tab', 'SQL query formatter', 'Local text editor'],
+      correctAnswer: '0',
+      explanation: 'Scaling is managed by orchestrator/auto-scaling control plane.'
+    },
+    {
+      id: 'q-r1-m2-4',
+      section: 'phase2',
+      prompt: 'Architecture Leak Q4: Which addition most improves availability for the database layer?',
+      type: 'mcq',
+      options: ['Primary-Replica setup with failover', 'Bigger app logo', 'Disable health checks', 'Remove backups'],
+      correctAnswer: '0',
+      explanation: 'Replica + failover improves DB availability.'
+    },
+    {
+      id: 'q-r1-m2-5',
+      section: 'phase2',
+      prompt: 'Architecture Leak Q5: Which metric is most useful to decide when to add more app servers?',
+      type: 'mcq',
+      options: ['CPU/latency/request rate', 'Wallpaper color', 'Keyboard layout', 'File explorer theme'],
+      correctAnswer: '0',
+      explanation: 'CPU, latency and throughput drive scaling decisions.'
+    }
+  ];
+}
+
+function createRound1QuestionBank() {
+  const phase3 = createRound1McqSet().map((question, index) => ({
+    ...question,
+    id: `q-r1-m3-${index + 1}`,
+    section: 'phase3'
+  }));
+  return [...createRound1MysteryImageSet(), ...createRound1ArchitectureLeakSet(), ...phase3];
+}
+
 function createDefaultLiveState() {
   return {
     activeRound: 'r1',
@@ -1883,7 +1992,7 @@ function createDefaultLiveState() {
     rounds: {
       r1: {
         ...createDefaultLiveRound('r1', 'The Bloodbath', '3-Phased Digital Trial', 'Round 1 The Bloodbath 3-Phased Digital Trial: 2 Multiplier Challenges (Mystery Image and Architecture Leak) followed by an MCQ Quiz. Top 60 Survivors.', 'registered', 45),
-        questions: createRound1McqSet()
+        questions: createRound1QuestionBank()
       },
       r2: createDefaultLiveRound('r2', 'The Tracker Jacker Trail', 'Digital Logical Labyrinth', 'Branching Google Form logic with gate checkpoints and dead-end traps.', 'qualified', 30),
       r3: createDefaultLiveRound('r3', 'The Mockingjay\'s Blueprint', 'Lightning Ideathon', 'Strategy, design, and pitch for the semifinalists.', 'r2', 40),
@@ -1896,7 +2005,10 @@ function mergeLiveState(remoteLive) {
   const base = createDefaultLiveState();
   const remoteRounds = remoteLive?.rounds || {};
   const mergedR1 = { ...base.rounds.r1, ...(remoteRounds.r1 || {}) };
-  if(!Array.isArray(remoteRounds.r1?.questions) || !remoteRounds.r1.questions.length) {
+  const r1Questions = Array.isArray(remoteRounds.r1?.questions) ? remoteRounds.r1.questions : [];
+  const hasPhase1 = r1Questions.some((question) => question?.section === 'phase1' || String(question?.id || '').startsWith('q-r1-m1-'));
+  const hasPhase2 = r1Questions.some((question) => question?.section === 'phase2' || String(question?.id || '').startsWith('q-r1-m2-'));
+  if(!r1Questions.length || !hasPhase1 || !hasPhase2) {
     mergedR1.questions = base.rounds.r1.questions;
   }
   return {
@@ -3181,8 +3293,15 @@ function gradeQuiz(roundKey, tributeId) {
   const round = getLiveRound(roundKey);
   const questions = round.questions || [];
   let score = 0;
+  let phase1Correct = 0;
+  let phase2Correct = 0;
+  let phase3Correct = 0;
+  let phase1Total = 0;
+  let phase2Total = 0;
+  let phase3Total = 0;
   questions.forEach((question) => {
     const raw = String(getQuizAnswerFor(roundKey, tributeId, question.id) || '').trim();
+    let matched = false;
     if(question.type === 'mcq') {
       const correct = String(question.correctAnswer || question.correctIndex || '').trim();
       const normalizedRaw = raw.toLowerCase();
@@ -3194,7 +3313,7 @@ function gradeQuiz(roundKey, tributeId) {
       const correctAsLetter = correctIndex >= 0 && correctIndex < letterMap.length ? letterMap[correctIndex] : normalizedCorrect;
       const optionByRawIndex = rawIndex >= 0 ? String((question.options || [])[rawIndex] || '').trim().toLowerCase() : '';
       const optionByCorrectIndex = correctIndex >= 0 ? String((question.options || [])[correctIndex] || '').trim().toLowerCase() : '';
-      const matched = (
+      matched = (
         normalizedRaw !== '' && (
           normalizedRaw === normalizedCorrect ||
           rawAsLetter === normalizedCorrect ||
@@ -3206,9 +3325,46 @@ function gradeQuiz(roundKey, tributeId) {
       if(matched) score += 1;
     } else {
       const correctText = String(question.correctAnswer || '').trim().toLowerCase();
-      if(raw && correctText && raw.toLowerCase() === correctText) score += 1;
+      matched = !!(raw && correctText && raw.toLowerCase() === correctText);
+      if(matched) score += 1;
+    }
+
+    if(roundKey === 'r1') {
+      const section = String(question.section || '').toLowerCase();
+      if(section === 'phase1') {
+        phase1Total += 1;
+        if(matched) phase1Correct += 1;
+      } else if(section === 'phase2') {
+        phase2Total += 1;
+        if(matched) phase2Correct += 1;
+      } else {
+        phase3Total += 1;
+        if(matched) phase3Correct += 1;
+      }
     }
   });
+
+  if(roundKey === 'r1') {
+    const imageMultiplier = phase1Correct <= 2 ? 1 : phase1Correct <= 4 ? 1.5 : 2;
+    const architectureMultiplier = phase2Correct <= 1 ? 1 : phase2Correct <= 3 ? 1.5 : 2;
+    const finalScore = Number((phase3Correct * imageMultiplier * architectureMultiplier).toFixed(2));
+    return {
+      score: finalScore,
+      total: phase3Total,
+      breakdown: {
+        phase1Correct,
+        phase1Total,
+        phase2Correct,
+        phase2Total,
+        phase3Correct,
+        phase3Total,
+        imageMultiplier,
+        architectureMultiplier,
+        formula: 'Final Score = (MCQ Score) x (Image Multiplier) x (Architecture Multiplier)'
+      }
+    };
+  }
+
   return { score, total: questions.length };
 }
 
@@ -3336,9 +3492,11 @@ function renderQuizRoom() {
 
   if(submitted) {
     const result = state.live?.results?.[roundKey]?.[tribute.id] || gradeQuiz(roundKey, tribute.id);
+    const breakdown = result?.breakdown;
     body.innerHTML = `
       <div class="quiz-question">Submission completed.</div>
       <div class="quiz-meta">Score: ${result.score}/${result.total} · Submitted at ${new Date(session.submittedAt).toLocaleString('en-IN')}</div>
+      ${breakdown ? `<div class="quiz-meta" style="margin-top:0.5rem">Phase 1: ${breakdown.phase1Correct}/${breakdown.phase1Total} (x${breakdown.imageMultiplier}) · Phase 2: ${breakdown.phase2Correct}/${breakdown.phase2Total} (x${breakdown.architectureMultiplier}) · Phase 3 MCQ: ${breakdown.phase3Correct}/${breakdown.phase3Total}</div>` : ''}
       <div class="quiz-actions">
         <button class="admin-btn admin-btn-primary" onclick="exitQuizRoom()">Return</button>
       </div>
@@ -3368,13 +3526,20 @@ function renderQuizRoom() {
   const q = questions[index];
   const answer = getQuizAnswerFor(roundKey, tribute.id, q.id);
   const progressPct = Math.round(((index + 1) / total) * 100);
+  const sectionLabel = q.section === 'phase1'
+    ? 'Phase 1: Mystery Image (Multiplier 1)'
+    : q.section === 'phase2'
+      ? 'Phase 2: Architecture Leak (Multiplier 2)'
+      : q.section === 'phase3'
+        ? 'Phase 3: MCQ Speed Quiz'
+        : 'Question';
 
   const questionBody = q.type === 'mcq'
     ? `<div class="quiz-options">${(q.options || []).map((opt, i) => `<button class="quiz-option ${answer === String(i) ? 'active' : ''}" onclick="selectQuizOption(${i})">${escapeHTML(opt || ('Option ' + (i + 1)))}</button>`).join('')}</div>`
     : `<div class="form-group"><label class="form-label">Your Answer</label><input class="form-input" id="quizTextAnswer" type="text" value="${escapeHTML(answer)}" placeholder="Type your answer"></div><div class="quiz-actions"><button class="admin-btn admin-btn-primary" onclick="saveQuizTextAnswer()">Save Answer</button></div>`;
 
   body.innerHTML = `
-    <div class="quiz-meta">Question ${index + 1} of ${total}</div>
+    <div class="quiz-meta">${sectionLabel} · Question ${index + 1} of ${total}</div>
     <div class="quiz-progress">
       <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${progressPct}%"></div></div>
     </div>
