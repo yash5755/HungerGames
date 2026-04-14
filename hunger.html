@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hunger Games: Survival of the Smartest | AWS Cloud Club VVCE</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d080;
+  --gold-dark: #8a6a20;
+  --crimson: #8b1a1a;
+  --crimson-bright: #cc2222;
+  --ember: #e85d04;
+  --ash: #1a1a1a;
+  --charcoal: #0d0d0d;
+  --smoke: #1e1e1e;
+  --parchment: #f5e6c8;
+  --pale: #e8d9b5;
+  --text-muted: #9a8a6a;
+  --aws-orange: #FF9900;
+  --aws-dark: #232F3E;
+  --green: #2ecc71;
+  --panel-bg: rgba(20,15,8,0.95);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(201,168,76,0.12), transparent 28%),
+    linear-gradient(180deg, #090c14 0%, #0a111d 48%, #070b12 100%);
+  color: var(--parchment);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+#fire-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 0; opacity: 0.12;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.035; pointer-events: none; z-index: 1;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: linear-gradient(to bottom, rgba(8,6,3,0.98) 0%, rgba(8,6,3,0.85) 100%);
+  padding: 1rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+  backdrop-filter: blur(10px);
+}
+.nav-logo {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 0.65rem; color: var(--gold);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.nav-aws-badge {
+  background: var(--aws-dark); border: 1px solid var(--aws-orange);
+  color: var(--aws-orange); font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem; padding: 0.2rem 0.5rem; letter-spacing: 0.1em;
+}
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a {
+  font-family: 'Cinzel', serif; font-size: 0.62rem;
+  letter-spacing: 0.2em; color: var(--text-muted);
+  text-decoration: none; text-transform: uppercase; transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-admin-btn {
+  font-family: 'Cinzel', serif; font-size: 0.6rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  background: transparent; border: 1px solid rgba(201,168,76,0.4);
+  color: var(--gold); padding: 0.4rem 1rem; cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-admin-btn:hover { background: rgba(201,168,76,0.1); }
+
+/* HERO */
+.hero {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 8rem 2rem 5rem; z-index: 2;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(232,93,4,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 18% 20%, rgba(56,189,248,0.08) 0%, transparent 42%),
+    radial-gradient(ellipse at 82% 18%, rgba(201,168,76,0.12) 0%, transparent 38%),
+    linear-gradient(180deg, rgba(6,10,18,0.94) 0%, rgba(10,15,24,0.95) 100%);
+  z-index: -1;
+}
+.mockingjay-svg {
+  width: 110px; height: 110px; margin-bottom: 1.5rem;
+  animation: float 4s ease-in-out infinite, glow-pulse 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes glow-pulse {
+  0%,100%{filter:drop-shadow(0 0 15px rgba(232,93,4,0.6))}
+  50%{filter:drop-shadow(0 0 40px rgba(232,93,4,1)) drop-shadow(0 0 80px rgba(201,168,76,0.4))}
+}
+.inst-tag {
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase;
+  border: 1px solid rgba(201,168,76,0.35); padding: 0.5rem 1.15rem;
+  margin-bottom: 1.25rem; animation: fadeDown 1s 0.2s both;
+  background: rgba(201,168,76,0.06); border-radius: 999px;
+}
+.presents {
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.68rem;
+  letter-spacing: 0.4em; color: var(--text-muted); text-transform: uppercase;
+  margin-bottom: 0.8rem; animation: fadeDown 1s 0.4s both;
+}
+.hero-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.2rem, 6vw, 5rem); font-weight: 900; line-height: 1.1;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(201,168,76,0.5), 0 0 80px rgba(232,93,4,0.25), 2px 2px 0 rgba(0,0,0,0.9);
+  animation: fadeDown 1s 0.6s both; margin-bottom: 0.5rem;
+}
+.hero-sub {
+  font-family: 'Space Grotesk', sans-serif; font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+  font-weight: 700; letter-spacing: 0.24em; color: var(--crimson-bright);
+  text-transform: uppercase; animation: fadeDown 1s 0.8s both; margin-bottom: 2.5rem;
+}
+.hero-copy {
+  max-width: 760px;
+  margin: 0 auto 2rem;
+  color: rgba(245,230,200,0.78);
+  font-size: 1rem;
+  line-height: 1.75;
+  animation: fadeUp 1s 0.95s both;
+}
+.hero-stats {
+  display: flex; gap: 3rem; justify-content: center; margin-bottom: 3rem;
+  animation: fadeUp 1s 1s both; flex-wrap: wrap;
+}
+.stat { text-align: center; position: relative; }
+.stat::after { content:'·'; position:absolute; right:-1.6rem; top:50%; transform:translateY(-50%); color:var(--gold-dark); font-size:1.5rem; }
+.stat:last-child::after { display:none; }
+.stat-number { font-family:'Fraunces',serif; font-size:2.15rem; font-weight:700; color:var(--gold); display:block; line-height:1; }
+.stat-label { font-family:'Space Grotesk',sans-serif; font-size:0.62rem; letter-spacing:0.25em; color:var(--text-muted); text-transform:uppercase; margin-top:0.35rem; display:block; }
+
+.cta-group { display:flex; gap:1.2rem; animation:fadeUp 1s 1.2s both; flex-wrap:wrap; justify-content:center; margin-bottom:2rem; }
+.btn-primary {
+  font-family:'Space Grotesk',sans-serif; font-size:0.75rem; letter-spacing:0.22em; text-transform:uppercase;
+  background:linear-gradient(135deg, var(--crimson-bright), var(--crimson));
+  color:var(--parchment); border:none; padding:1rem 2.5rem; cursor:pointer;
+  text-decoration:none; display:inline-block; transition:all 0.3s;
+  border-radius:999px;
+  box-shadow:0 4px 20px rgba(204,34,34,0.4);
+}
+.btn-primary:hover { background:linear-gradient(135deg, #e83333, #aa2222); box-shadow:0 6px 30px rgba(204,34,34,0.6); transform:translateY(-2px); }
+.btn-secondary {
+  font-family:'Space Grotesk',sans-serif; font-size:0.75rem; letter-spacing:0.22em; text-transform:uppercase;
+  background:transparent; color:var(--gold); border:1px solid rgba(201,168,76,0.5);
+  padding:1rem 2.5rem; cursor:pointer; text-decoration:none; display:inline-block;
+  transition:all 0.3s; border-radius:999px;
+}
+.btn-secondary:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); }
+
+.scroll-hint {
+  font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.4em;
+  color:var(--text-muted); text-transform:uppercase; animation:fadeUp 1s 1.5s both;
+  display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+}
+.scroll-arrow { animation:bounceDown 1.5s ease-in-out infinite; font-size:1rem; color:var(--gold-dark); }
+@keyframes bounceDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:none} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+
+/* EVENT FLOW */
+.section { position:relative; z-index:2; padding:6rem 2rem; }
+.section-tag {
+  font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em;
+  color:var(--ember); text-transform:uppercase; text-align:center;
+  margin-bottom:1rem; display:block;
+}
+.section-title {
+  font-family:'Cinzel Decorative',serif; font-size:clamp(1.8rem,4vw,3rem);
+  text-align:center; color:var(--gold); margin-bottom:0.8rem;
+  text-shadow:0 0 30px rgba(201,168,76,0.3);
+}
+.section-subtitle {
+  font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.2em;
+  color:var(--text-muted); text-transform:uppercase; text-align:center;
+  margin-bottom:4rem;
+}
+.divider {
+  display:flex; align-items:center; gap:1rem; max-width:600px;
+  margin:0 auto 4rem; padding:0 2rem;
+}
+.divider-line { flex:1; height:1px; background:linear-gradient(to right, transparent, rgba(201,168,76,0.4), transparent); }
+.divider-icon { color:var(--gold-dark); font-size:0.8rem; }
+
+/* FLOW TIMELINE */
+.flow-timeline {
+  max-width:900px; margin:0 auto; position:relative; padding:0 1rem;
+}
+.flow-timeline::before {
+  content:''; position:absolute; left:50%; top:0; bottom:0; width:1px;
+  background:linear-gradient(to bottom, transparent, rgba(201,168,76,0.3) 10%, rgba(201,168,76,0.3) 90%, transparent);
+  transform:translateX(-50%);
+}
+.flow-item {
+  display:flex; align-items:flex-start; gap:2rem; margin-bottom:3rem;
+  opacity:0; transform:translateY(30px); transition:all 0.6s;
+}
+.flow-item.visible { opacity:1; transform:none; }
+.flow-item:nth-child(even) { flex-direction:row-reverse; text-align:right; }
+.flow-side { flex:1; }
+.flow-node {
+  width:50px; height:50px; border-radius:50%;
+  background:var(--smoke); border:2px solid var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cinzel Decorative',serif; font-size:0.8rem; color:var(--gold);
+  flex-shrink:0; position:relative; z-index:1;
+  box-shadow:0 0 20px rgba(201,168,76,0.2);
+}
+.flow-date {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+  color:var(--ember); letter-spacing:0.1em; margin-bottom:0.4rem;
+}
+.flow-name {
+  font-family:'Cinzel Decorative',serif; font-size:1.1rem; color:var(--gold);
+  margin-bottom:0.4rem;
+}
+.flow-desc {
+  font-family:'IM Fell English',serif; font-size:0.85rem;
+  color:var(--text-muted); line-height:1.6;
+}
+.flow-outcome {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+  color:var(--green); letter-spacing:0.1em; margin-top:0.5rem;
+  border:1px solid rgba(46,204,113,0.3); display:inline-block;
+  padding:0.2rem 0.6rem;
+}
+
+/* ROUNDS */
+.rounds-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+@media(max-width:768px) { .rounds-grid{grid-template-columns:1fr;} .flow-item,.flow-item:nth-child(even){flex-direction:column;text-align:left;} .flow-timeline::before{left:25px;} .nav-links{display:none;} }
+.round-card {
+  background:linear-gradient(180deg, rgba(18,24,36,0.88), rgba(10,14,22,0.92));
+  border:1px solid rgba(201,168,76,0.16); padding:2.4rem;
+  position:relative; overflow:hidden;
+  opacity:0; transform:translateY(40px); transition:all 0.7s;
+  border-radius:24px; box-shadow:0 20px 50px rgba(0,0,0,0.22);
+}
+.round-card.visible { opacity:1; transform:none; }
+.round-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(to right, transparent, var(--gold), transparent);
+}
+.round-card.finale { grid-column:1/-1; border-color:rgba(201,168,76,0.5); }
+.round-card.finale::before { background:linear-gradient(to right, transparent, var(--gold-light), transparent); }
+.round-num-bg {
+  position:absolute; top:-10px; right:1rem;
+  font-family:'Cinzel Decorative',serif; font-size:5rem; font-weight:900;
+  color:rgba(201,168,76,0.04); line-height:1; pointer-events:none; user-select:none;
+}
+.round-badge {
+  display:inline-flex; flex-direction:column; margin-bottom:1rem;
+  border:1px solid rgba(201,168,76,0.3); padding:0.45rem 1rem;
+  border-radius:999px; background:rgba(201,168,76,0.05);
+}
+.round-badge-num { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--ember); letter-spacing:0.15em; }
+.round-badge-label { font-family:'Cinzel',serif; font-size:0.6rem; color:var(--text-muted); letter-spacing:0.2em; text-transform:uppercase; }
+.round-title {
+  font-family:'Cinzel Decorative',serif; font-size:1.5rem; color:var(--gold);
+  margin-bottom:0.3rem;
+}
+.round-sub { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--text-muted); letter-spacing:0.1em; margin-bottom:1.2rem; }
+.round-desc { font-size:0.9rem; color:var(--pale); line-height:1.7; margin-bottom:1.5rem; }
+.round-details { list-style:none; margin-bottom:1.5rem; }
+.round-details li {
+  font-family:'Share Tech Mono',monospace; font-size:0.7rem; color:var(--text-muted);
+  padding:0.35rem 0; border-bottom:1px solid rgba(201,168,76,0.08);
+  padding-left:1rem; position:relative;
+}
+.round-details li::before { content:'›'; position:absolute; left:0; color:var(--ember); }
+.survival-badge {
+  display:flex; align-items:center; gap:0.6rem;
+  background:rgba(204,34,34,0.1); border:1px solid rgba(204,34,34,0.3);
+  padding:0.6rem 1rem;
+}
+.survival-badge-icon { color:var(--crimson-bright); font-size:0.9rem; }
+.survival-badge-text { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--crimson-bright); }
+.gold-badge { background:rgba(201,168,76,0.1)!important; border-color:rgba(201,168,76,0.4)!important; }
+.gold-badge .survival-badge-icon, .gold-badge .survival-badge-text { color:var(--gold)!important; }
+
+/* TAGS */
+.tag-group { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.2rem; }
+.tag {
+  font-family:'Share Tech Mono',monospace; font-size:0.6rem; letter-spacing:0.08em;
+  color:var(--gold-dark); border:1px solid rgba(201,168,76,0.2);
+  padding:0.2rem 0.6rem; background:rgba(201,168,76,0.05);
+}
+
+/* REGISTER */
+.register-section {
+  position:relative; z-index:2; padding:6rem 2rem;
+  background:linear-gradient(to bottom, transparent, rgba(139,26,26,0.08), transparent);
+  text-align:center;
+}
+.auth-banner {
+  max-width: 920px;
+  margin: 0 auto 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid rgba(201,168,76,0.18);
+  background: rgba(12,18,30,0.72);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  text-align: left;
+}
+.auth-copy {
+  max-width: 560px;
+  font-size: 0.92rem;
+  color: var(--pale);
+}
+.auth-title {
+  font-family:'Fraunces',serif;
+  font-size: 1.5rem;
+  color: var(--gold);
+  margin-bottom: 0.3rem;
+}
+.auth-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+}
+.google-btn {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase;
+  padding:1rem 1.2rem; cursor:pointer; border:1px solid rgba(255,255,255,0.12);
+  border-radius:999px; background:linear-gradient(135deg, #ffffff, #e5e7eb);
+  color:#0f172a; display:inline-flex; align-items:center; gap:0.7rem;
+  box-shadow:0 12px 25px rgba(255,255,255,0.08);
+  white-space:nowrap;
+}
+.google-btn:hover { transform:translateY(-2px); }
+.google-btn::before { content:'G'; font-weight:700; color:#4285f4; font-size:1rem; }
+
+.status-panel {
+  max-width: 920px;
+  margin: 1.25rem auto 0;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(201,168,76,0.16);
+  border-radius: 22px;
+  background: rgba(14,20,32,0.72);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.16);
+}
+.status-panel-head {
+  display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;
+}
+.status-panel-title {
+  font-family:'Fraunces',serif; font-size:1.2rem; color:var(--gold); margin-bottom:0.25rem;
+}
+.status-panel-sub {
+  font-family:'Space Grotesk',sans-serif; font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted);
+}
+.status-grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:0.8rem; margin-top:1rem;
+}
+.status-chip {
+  border:1px solid rgba(201,168,76,0.15);
+  border-radius:18px;
+  padding:0.9rem 1rem;
+  background:rgba(8,14,24,0.7);
+}
+.status-chip-label {
+  display:block; font-family:'Space Grotesk',sans-serif; font-size:0.55rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.35rem;
+}
+.status-chip-value {
+  font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--parchment); word-break:break-word;
+}
+.status-chip-value strong { color:var(--gold); }
+.reg-info-grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:1.5rem; max-width:800px; margin:3rem auto;
+}
+.reg-info-item {
+  background:rgba(14,20,32,0.8); border:1px solid rgba(201,168,76,0.15);
+  padding:1.5rem; display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+  border-radius:22px; box-shadow:0 16px 38px rgba(0,0,0,0.16);
+}
+.reg-icon { font-size:1.5rem; }
+.reg-label { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.25em; color:var(--text-muted); text-transform:uppercase; }
+.reg-value { font-family:'Share Tech Mono',monospace; font-size:0.85rem; color:var(--gold); }
+
+.reg-form { max-width:520px; margin:0 auto; }
+.form-group { margin-bottom:1.2rem; text-align:left; }
+.form-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:0.5rem; }
+.form-input, .form-select {
+  width:100%; background:rgba(12,18,30,0.88); border:1px solid rgba(201,168,76,0.18);
+  color:var(--parchment); font-family:'JetBrains Mono',monospace; font-size:0.8rem;
+  padding:0.8rem 1rem; outline:none; transition:border-color 0.3s;
+  -webkit-appearance:none;
+}
+.form-input:focus, .form-select:focus { border-color:var(--gold); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.submit-btn {
+  width:100%; font-family:'Space Grotesk',sans-serif; font-size:0.75rem; letter-spacing:0.22em;
+  text-transform:uppercase; background:linear-gradient(135deg, #cc2222, #8b1a1a);
+  color:var(--parchment); border:none; padding:1.1rem; cursor:pointer;
+  transition:all 0.3s; border-radius:999px;
+  box-shadow:0 4px 25px rgba(204,34,34,0.35); margin-top:0.5rem;
+}
+.submit-btn:hover { background:linear-gradient(135deg, #e03333, #aa2222); transform:translateY(-2px); box-shadow:0 6px 35px rgba(204,34,34,0.5); }
+.form-msg { font-family:'Space Grotesk',sans-serif; font-size:0.65rem; letter-spacing:0.15em; text-align:center; margin-top:1rem; height:1.5rem; }
+.form-msg.success { color:var(--green); }
+.form-msg.error { color:var(--crimson-bright); }
+
+/* ADMIN PANEL */
+.admin-overlay {
+  position:fixed; inset:0; z-index:2000;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center; padding:1rem;
+}
+.admin-overlay.open { display:flex; }
+.admin-panel {
+  background:rgba(10,16,26,0.96); border:1px solid rgba(201,168,76,0.24);
+  max-width:960px; width:100%; max-height:90vh; overflow-y:auto;
+  position:relative; border-radius:24px; box-shadow:0 30px 70px rgba(0,0,0,0.35);
+}
+.admin-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.5rem 2rem; border-bottom:1px solid rgba(201,168,76,0.2);
+  position:sticky; top:0; background:var(--panel-bg); z-index:10;
+}
+.admin-title { font-family:'Cinzel Decorative',serif; font-size:1.2rem; color:var(--gold); }
+.admin-close {
+  background:none; border:1px solid rgba(201,168,76,0.3); color:var(--gold);
+  font-size:1.2rem; cursor:pointer; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s;
+}
+.admin-close:hover { background:rgba(201,168,76,0.1); }
+.admin-tabs {
+  display:flex; border-bottom:1px solid rgba(201,168,76,0.15); padding:0 2rem;
+  overflow-x:auto; background:var(--panel-bg);
+}
+.admin-tab {
+  font-family:'Space Grotesk',sans-serif; font-size:0.6rem; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--text-muted); padding:1rem 1.2rem;
+  border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap;
+  transition:all 0.2s; background:none; border-top:none; border-left:none; border-right:none;
+}
+.admin-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+.admin-body { padding:2rem; }
+.admin-section { display:none; }
+.admin-section.active { display:block; }
+
+/* ADMIN STATS */
+.admin-stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
+.admin-stat-card {
+  background:rgba(14,20,32,0.7); border:1px solid rgba(201,168,76,0.15);
+  padding:1.2rem; text-align:center; border-radius:18px;
+}
+.admin-stat-val { font-family:'Cinzel Decorative',serif; font-size:1.8rem; color:var(--gold); display:block; }
+.admin-stat-lbl { font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:var(--text-muted); letter-spacing:0.1em; }
+
+/* ADMIN TABLE */
+.admin-table-wrap { overflow-x:auto; }
+.admin-table { width:100%; border-collapse:collapse; }
+.admin-table th {
+  font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--text-muted);
+  border-bottom:1px solid rgba(201,168,76,0.2); padding:0.8rem 0.6rem; text-align:left;
+}
+.admin-table td {
+  font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:var(--pale);
+  border-bottom:1px solid rgba(201,168,76,0.07); padding:0.7rem 0.6rem;
+}
+.admin-table tr:hover td { background:rgba(201,168,76,0.04); }
+.status-badge {
+  font-family:'Share Tech Mono',monospace; font-size:0.6rem; padding:0.15rem 0.5rem;
+  border-radius:2px; display:inline-block;
+}
+.status-active { background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.3); }
+.status-pending { background:rgba(255,153,0,0.15); color:var(--aws-orange); border:1px solid rgba(255,153,0,0.3); }
+.status-eliminated { background:rgba(204,34,34,0.15); color:var(--crimson-bright); border:1px solid rgba(204,34,34,0.3); }
+.action-btn {
+  font-family:'Share Tech Mono',monospace; font-size:0.6rem; padding:0.25rem 0.6rem;
+  border:1px solid; cursor:pointer; background:none; transition:all 0.2s; margin-right:0.3rem;
+}
+.action-advance { color:var(--green); border-color:rgba(46,204,113,0.4); }
+.action-advance:hover { background:rgba(46,204,113,0.1); }
+.action-eliminate { color:var(--crimson-bright); border-color:rgba(204,34,34,0.4); }
+.action-eliminate:hover { background:rgba(204,34,34,0.1); }
+
+/* ADMIN CONTROLS */
+.admin-controls { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; align-items:center; }
+.admin-input {
+  background:rgba(20,14,6,0.8); border:1px solid rgba(201,168,76,0.25);
+  color:var(--parchment); font-family:'Share Tech Mono',monospace; font-size:0.75rem;
+  padding:0.5rem 0.8rem; outline:none; flex:1; min-width:150px;
+}
+.admin-input:focus { border-color:var(--gold); }
+.admin-btn {
+  font-family:'Space Grotesk',sans-serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase;
+  padding:0.5rem 1.2rem; cursor:pointer; border:1px solid; transition:all 0.2s; background:none;
+  border-radius:999px;
+}
+.admin-btn-primary { color:var(--gold); border-color:rgba(201,168,76,0.4); }
+.admin-btn-primary:hover { background:rgba(201,168,76,0.1); }
+.admin-btn-danger { color:var(--crimson-bright); border-color:rgba(204,34,34,0.4); }
+.admin-btn-danger:hover { background:rgba(204,34,34,0.1); }
+.admin-btn-success { color:var(--green); border-color:rgba(46,204,113,0.4); }
+.admin-btn-success:hover { background:rgba(46,204,113,0.1); }
+
+.round-control {
+  background:rgba(14,20,32,0.78); border:1px solid rgba(201,168,76,0.15);
+  padding:1.5rem; margin-bottom:1rem; border-radius:20px;
+}
+.round-ctrl-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.round-ctrl-title { font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold); }
+.round-ctrl-status { font-family:'Share Tech Mono',monospace; font-size:0.65rem; }
+.progress-bar-wrap { background:rgba(201,168,76,0.1); height:6px; margin:0.5rem 0; border-radius:3px; overflow:hidden; }
+.progress-bar { height:100%; background:linear-gradient(to right, var(--ember), var(--gold)); border-radius:3px; transition:width 0.5s; }
+
+/* LEADERBOARD */
+.leaderboard { max-width:700px; margin:0 auto; }
+.lb-item {
+  display:grid; grid-template-columns:2.5rem 1fr auto auto;
+  align-items:center; gap:1rem; padding:0.8rem 1rem;
+  border-bottom:1px solid rgba(201,168,76,0.08);
+  transition:background 0.2s;
+}
+.lb-item:hover { background:rgba(201,168,76,0.04); }
+.lb-rank {
+  font-family:'Cinzel Decorative',serif; font-size:1rem; color:var(--text-muted);
+  text-align:center;
+}
+.lb-rank.top1 { color:var(--gold); }
+.lb-rank.top2 { color:#c0c0c0; }
+.lb-rank.top3 { color:#cd7f32; }
+.lb-name { font-family:'Share Tech Mono',monospace; font-size:0.8rem; color:var(--pale); }
+.lb-college { font-family:'IM Fell English',serif; font-size:0.7rem; color:var(--text-muted); }
+.lb-score { font-family:'Cinzel Decorative',serif; font-size:1rem; color:var(--gold); }
+.lb-round { font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:var(--text-muted); }
+
+/* SPONSOR PARACHUTE */
+.sponsor-section { position:relative; z-index:2; padding:3rem 2rem; text-align:center; }
+.parachutes { display:flex; justify-content:center; gap:3rem; flex-wrap:wrap; }
+.parachute {
+  background:rgba(14,20,32,0.72); border:1px solid rgba(201,168,76,0.2);
+  padding:2rem; max-width:280px; text-align:center; opacity:0;
+  transform:translateY(40px); transition:all 0.7s;
+  border-radius:22px; box-shadow:0 16px 38px rgba(0,0,0,0.16);
+}
+.parachute.visible { opacity:1; transform:none; }
+.parachute-icon { font-size:2.5rem; margin-bottom:1rem; display:block; animation:swing 3s ease-in-out infinite; }
+@keyframes swing { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+.parachute-title { font-family:'Cinzel Decorative',serif; font-size:1rem; color:var(--gold); margin-bottom:0.5rem; }
+.parachute-desc { font-size:0.8rem; color:var(--text-muted); line-height:1.6; }
+
+/* FOOTER */
+footer {
+  position:relative; z-index:2; padding:3rem 2rem; text-align:center;
+  border-top:1px solid rgba(201,168,76,0.15);
+  background:linear-gradient(to top, rgba(5,3,1,0.9), transparent);
+}
+.footer-logo { font-family:'Cinzel Decorative',serif; font-size:1.2rem; color:var(--gold); margin-bottom:1rem; }
+.footer-inst { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; color:var(--text-muted); line-height:2; text-transform:uppercase; margin-bottom:1.5rem; }
+.footer-links { display:flex; justify-content:center; gap:2rem; margin-bottom:1.5rem; }
+.footer-links a { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--text-muted); text-decoration:none; text-transform:uppercase; transition:color 0.3s; }
+.footer-links a:hover { color:var(--gold); }
+.footer-copy { font-family:'IM Fell English',serif; font-size:0.75rem; color:rgba(154,138,106,0.5); font-style:italic; }
+
+/* CONFETTI */
+.confetti-canvas { position:fixed; inset:0; pointer-events:none; z-index:3000; display:none; }
+
+/* MODALS */
+.modal-overlay {
+  position:fixed; inset:0; z-index:1500; background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:1rem;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--panel-bg); border:1px solid rgba(201,168,76,0.3);
+  padding:2.5rem; max-width:480px; width:100%; text-align:center;
+}
+.modal-icon { font-size:3rem; display:block; margin-bottom:1rem; }
+.modal-title { font-family:'Cinzel Decorative',serif; font-size:1.5rem; color:var(--gold); margin-bottom:0.8rem; }
+.modal-text { font-size:0.9rem; color:var(--pale); line-height:1.7; margin-bottom:1.5rem; }
+.modal-id {
+  font-family:'Share Tech Mono',monospace; font-size:1.1rem; color:var(--gold);
+  background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.3);
+  padding:0.8rem 1.5rem; letter-spacing:0.2em; margin-bottom:1.5rem; display:block;
+}
+.modal-close-btn {
+  font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.25em;
+  text-transform:uppercase; background:none; border:1px solid rgba(201,168,76,0.4);
+  color:var(--gold); padding:0.7rem 2rem; cursor:pointer; transition:all 0.2s;
+}
+.modal-close-btn:hover { background:rgba(201,168,76,0.1); }
+
+/* LIVE STATUS TICKER */
+.live-ticker {
+  position:fixed; bottom:0; left:0; right:0; z-index:500;
+  background:rgba(10,6,2,0.95); border-top:1px solid rgba(201,168,76,0.2);
+  padding:0.5rem 1rem; display:flex; align-items:center; gap:1rem; overflow:hidden;
+}
+.ticker-label {
+  font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.25em;
+  text-transform:uppercase; color:var(--ember); white-space:nowrap;
+  background:rgba(232,93,4,0.1); padding:0.2rem 0.6rem; border:1px solid rgba(232,93,4,0.3);
+}
+.ticker-track { flex:1; overflow:hidden; }
+.ticker-inner {
+  display:flex; gap:3rem; white-space:nowrap;
+  animation:ticker 30s linear infinite;
+}
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ticker-item {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--text-muted);
+  flex-shrink:0;
+}
+.ticker-item span { color:var(--gold); }
+
+/* CAPITOL SEAL */
+.capitol-seal {
+  display:block; margin:2rem auto;
+  width:80px; height:80px; opacity:0.15;
+}
+
+/* LIVE BADGE */
+.live-badge {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  background:rgba(204,34,34,0.15); border:1px solid rgba(204,34,34,0.4);
+  padding:0.3rem 0.7rem; font-family:'Share Tech Mono',monospace;
+  font-size:0.6rem; color:var(--crimson-bright); letter-spacing:0.1em;
+}
+.live-dot { width:6px; height:6px; background:var(--crimson-bright); border-radius:50%; animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* REAPING SECTION */
+.reaping-box {
+  max-width:600px; margin:0 auto;
+  background:rgba(20,14,6,0.8); border:1px solid rgba(201,168,76,0.25);
+  padding:2.5rem; text-align:center;
+}
+.countdown { display:flex; gap:1.5rem; justify-content:center; margin:2rem 0; }
+.cd-unit { text-align:center; }
+.cd-num {
+  font-family:'Cinzel Decorative',serif; font-size:2.5rem; color:var(--gold);
+  display:block; line-height:1;
+  text-shadow:0 0 20px rgba(201,168,76,0.4);
+}
+.cd-label { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.25em; color:var(--text-muted); text-transform:uppercase; }
+.cd-sep { font-family:'Cinzel Decorative',serif; font-size:2rem; color:var(--gold-dark); align-self:center; margin-top:-1rem; }
+
+/* SEARCH BAR */
+.search-bar {
+  display:flex; gap:0.5rem; margin-bottom:1.5rem;
+}
+.search-input {
+  flex:1; background:rgba(20,14,6,0.8); border:1px solid rgba(201,168,76,0.25);
+  color:var(--parchment); font-family:'Share Tech Mono',monospace; font-size:0.75rem;
+  padding:0.6rem 0.8rem; outline:none;
+}
+.search-input:focus { border-color:var(--gold); }
+.search-btn {
+  font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase;
+  padding:0.6rem 1.2rem; cursor:pointer; border:1px solid rgba(201,168,76,0.4);
+  color:var(--gold); background:none; transition:all 0.2s;
+}
+.search-btn:hover { background:rgba(201,168,76,0.1); }
+
+/* ADMIN LOGIN */
+.admin-login-form { max-width:360px; margin:0 auto; padding:2rem; }
+
+/* WINNER CROWN */
+.winner-section {
+  text-align:center; padding:2rem;
+}
+.crown-display { font-size:4rem; animation:crownFloat 2s ease-in-out infinite; display:block; margin-bottom:1rem; }
+@keyframes crownFloat { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
+.winner-name { font-family:'Cinzel Decorative',serif; font-size:2rem; color:var(--gold); margin-bottom:0.3rem; text-shadow:0 0 30px rgba(201,168,76,0.5); }
+.winner-detail { font-family:'Share Tech Mono',monospace; font-size:0.75rem; color:var(--text-muted); }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:3rem; right:1.5rem; z-index:5000;
+  background:rgba(20,14,6,0.95); border:1px solid rgba(201,168,76,0.3);
+  padding:1rem 1.5rem; max-width:320px;
+  font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; color:var(--gold);
+  transform:translateX(150%); transition:transform 0.4s;
+}
+.toast.show { transform:none; }
+.toast.success-toast { border-color:rgba(46,204,113,0.4); color:var(--green); }
+.toast.error-toast { border-color:rgba(204,34,34,0.4); color:var(--crimson-bright); }
+</style>
+</head>
+<body>
+
+<!-- FIRE BG -->
+<canvas id="fire-canvas"></canvas>
+
+<!-- CONFETTI -->
+<canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+<!-- LIVE TICKER -->
+<div class="live-ticker">
+  <div class="ticker-label">⚡ LIVE</div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="tickerInner">
+      <span class="ticker-item">The Arena is open · <span>150 Tributes</span> enter today</span>
+      <span class="ticker-item">Round 1 — <span>The Bloodbath</span> · Digital Speed Trial</span>
+      <span class="ticker-item">Top <span>60 Survivors</span> advance to Round 2</span>
+      <span class="ticker-item">Round 2 — <span>The Tracker Jacker Trial</span> · Navigate the Logic Maze</span>
+      <span class="ticker-item">Top <span>20 Semifinalists</span> advance to Round 3</span>
+      <span class="ticker-item">Round 3 — <span>The Mockingjay's Blueprint</span> · Lightning Ideathon</span>
+      <span class="ticker-item">Top <span>5 Finalists</span> advance to the Victor's Podium</span>
+      <span class="ticker-item">Organised by <span>AWS Cloud Club VVCE</span> · Hosted at your college</span>
+      <span class="ticker-item">The Arena is open · <span>150 Tributes</span> enter today</span>
+      <span class="ticker-item">Round 1 — <span>The Bloodbath</span> · Digital Speed Trial</span>
+      <span class="ticker-item">Top <span>60 Survivors</span> advance to Round 2</span>
+      <span class="ticker-item">Round 2 — <span>The Tracker Jacker Trial</span> · Navigate the Logic Maze</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-aws-badge">AWS</div>
+    The Hunger Games · VVCE
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#flow">Event Flow</a></li>
+    <li><a href="#rounds">Rounds</a></li>
+    <li><a href="#leaderboard">Leaderboard</a></li>
+    <li><a href="#register">Register</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="about">
+  <div class="hero-bg"></div>
+  <svg class="mockingjay-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="45" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.3"/>
+    <ellipse cx="50" cy="45" rx="8" ry="10" fill="#c9a84c" opacity="0.9"/>
+    <path d="M50 35 Q45 20 30 15 Q42 22 48 32" fill="#c9a84c" opacity="0.8"/>
+    <path d="M50 35 Q55 20 70 15 Q58 22 52 32" fill="#c9a84c" opacity="0.8"/>
+    <path d="M42 48 Q25 60 20 75 Q32 62 45 56" fill="#c9a84c" opacity="0.75"/>
+    <path d="M58 48 Q75 60 80 75 Q68 62 55 56" fill="#c9a84c" opacity="0.75"/>
+    <path d="M50 55 L44 80 L50 75 L56 80 Z" fill="#c9a84c" opacity="0.85"/>
+    <circle cx="44" cy="43" r="2" fill="#0d0d0d"/>
+    <circle cx="56" cy="43" r="2" fill="#0d0d0d"/>
+    <path d="M47 50 L50 53 L53 50" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.6"/>
+  </svg>
+
+  <div class="inst-tag">AWS Cloud Club VVCE · Survival of the Smartest</div>
+  <p class="presents">Presents</p>
+  <h1 class="hero-title">The Hunger Games</h1>
+  <p class="hero-sub">Survival of the Smartest</p>
+  <p class="hero-copy">A high-intensity elimination challenge for VVCE students. Register with your college Google account, qualify through the pre-event quiz, and survive four rounds of speed, logic, and architecture.</p>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-number" id="heroTributes">150</span>
+      <span class="stat-label">Tributes</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">4</span>
+      <span class="stat-label">Trials</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">1</span>
+      <span class="stat-label">Victor</span>
+    </div>
+  </div>
+
+  <div class="cta-group">
+    <a href="#register" class="btn-primary">Enter the Arena</a>
+    <a href="#rounds" class="btn-secondary">View Rounds</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll to survive</span>
+    <span class="scroll-arrow">↓</span>
+  </div>
+</section>
+
+<!-- PRE-EVENT FLOW -->
+<section class="section" id="flow">
+  <span class="section-tag">The Path to the Arena</span>
+  <h2 class="section-title">Event Flow</h2>
+  <p class="section-subtitle">From Registration to Victor · The Complete Journey for 150 Tributes</p>
+  <div class="divider"><div class="divider-line"></div><div class="divider-icon">◆</div><div class="divider-line"></div></div>
+
+  <div class="flow-timeline">
+    <div class="flow-item">
+      <div class="flow-side">
+        <div class="flow-date">Phase 0 · Pre-Event</div>
+        <div class="flow-name">The Enrollment</div>
+        <div class="flow-desc">Tributes sign in with Google, get a Tribute ID instantly, and can complete their profile details later. The Capitol accepts all students.</div>
+        <div class="flow-outcome">▸ Status: Official Entry List</div>
+      </div>
+      <div class="flow-node">E</div>
+      <div class="flow-side"></div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-side"></div>
+      <div class="flow-node">D</div>
+      <div class="flow-side">
+        <div class="flow-date">The Deadline</div>
+        <div class="flow-name">Registration Gates Close</div>
+        <div class="flow-desc">Registrations strictly close. No tributes may enter after this point. The Capitol seals the gates.</div>
+        <div class="flow-outcome">▸ Status: Final Registry Locked</div>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-side">
+        <div class="flow-date">Eve of the Games · The Reaping</div>
+        <div class="flow-name">Pre-Qualifying Quiz</div>
+        <div class="flow-desc">A high-speed digital qualifying quiz goes live for all registered tributes. Speed and accuracy determine who enters the Arena. Only the top 120 earn their place.</div>
+        <div class="flow-outcome">▸ Outcome: Top 120 Qualified</div>
+      </div>
+      <div class="flow-node">R</div>
+      <div class="flow-side"></div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-side"></div>
+      <div class="flow-node">⚔</div>
+      <div class="flow-side">
+        <div class="flow-date">Main Event Day · The Games</div>
+        <div class="flow-name">The Hunger Games Begin</div>
+        <div class="flow-desc">120 tributes enter the Arena. Four brutal rounds await. Only one will emerge as Victor. The Capitol watches.</div>
+        <div class="flow-outcome">▸ 4 Rounds · 1 Victor · AWS Winner's Badge</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROUNDS -->
+<section class="section" id="rounds">
+  <span class="section-tag">The Arena</span>
+  <h2 class="section-title">The Four Trials</h2>
+  <p class="section-subtitle">150 Tributes Enter · 1 Victor Emerges</p>
+  <div class="divider"><div class="divider-line"></div><div class="divider-icon">◆</div><div class="divider-line"></div></div>
+
+  <div class="rounds-grid">
+    <!-- Round 1 -->
+    <div class="round-card">
+      <div class="round-num-bg">I</div>
+      <div class="round-badge">
+        <span class="round-badge-num">Round 01</span>
+        <span class="round-badge-label">Digital Speed Trial</span>
+      </div>
+      <div class="round-title">The Bloodbath</div>
+      <div class="round-sub">// Digital Speed Trial //</div>
+      <div class="tag-group">
+        <span class="tag">120 Tributes</span><span class="tag">45 Minutes</span><span class="tag">MCQ Quiz</span><span class="tag">Speed + Accuracy</span>
+      </div>
+      <p class="round-desc">All 120 Tributes clash simultaneously in a 3-phased digital trial. Two Multiplier Challenges precede a rapid-fire MCQ quiz. Every second counts — speed and accuracy are both survival weapons.</p>
+      <ul class="round-details">
+        <li>Phase 1 & 2 — Multiplier Challenges: Mystery Image & Architecture Leak</li>
+        <li>Phase 3 — 10 rapid-fire MCQ questions across 45 minutes</li>
+        <li>Topics: General Tech · Pattern Recognition · Logic · Geek Culture · Aptitude</li>
+        <li>Booster questions award extra survival score multipliers</li>
+      </ul>
+      <div class="survival-badge">
+        <span class="survival-badge-icon">⚠</span>
+        <span class="survival-badge-text">Outcome: Top 60 Survivors Advance</span>
+      </div>
+    </div>
+
+    <!-- Round 2 -->
+    <div class="round-card">
+      <div class="round-num-bg">II</div>
+      <div class="round-badge">
+        <span class="round-badge-num">Round 02</span>
+        <span class="round-badge-label">Digital Logic Labyrinth</span>
+      </div>
+      <div class="round-title">The Tracker Jacker Trial</div>
+      <div class="round-sub">// Digital Logic Labyrinth //</div>
+      <div class="tag-group">
+        <span class="tag">60 Survivors</span><span class="tag">Google Forms</span><span class="tag">Branching Logic</span><span class="tag">First 20 Submit</span>
+      </div>
+      <p class="round-desc">60 survivors navigate a Google Form maze with branching logic — simulating a data packet travelling a network. Wrong turns loop you back. Dead ends cost precious time.</p>
+      <ul class="round-details">
+        <li>The Data Packet's Journey — navigate paths like a network packet</li>
+        <li>3 gate checkpoints (Section 1 → Section 2 → Section 3) in sequence</li>
+        <li>Dead End Riddle traps loop participants back and cost time</li>
+        <li>First 20 to correctly complete and submit the full form advance</li>
+      </ul>
+      <div class="survival-badge">
+        <span class="survival-badge-icon">⚠</span>
+        <span class="survival-badge-text">Outcome: Top 20 Semifinalists Advance</span>
+      </div>
+    </div>
+
+    <!-- Round 3 -->
+    <div class="round-card">
+      <div class="round-num-bg">III</div>
+      <div class="round-badge">
+        <span class="round-badge-num">Round 03</span>
+        <span class="round-badge-label">Lightning Ideathon</span>
+      </div>
+      <div class="round-title">The Mockingjay's Blueprint</div>
+      <div class="round-sub">// Lightning Ideathon //</div>
+      <div class="tag-group">
+        <span class="tag">20 Architects</span><span class="tag">Scalability</span><span class="tag">Security</span><span class="tag">Logic</span>
+      </div>
+      <p class="round-desc">20 Semifinalists design cloud-native Survival Blueprints for complex architectural scenarios. Three intense stages test strategy, design depth, and the power of your pitch.</p>
+      <ul class="round-details">
+        <li>Stage 1 — Strategy & Selection (5 min): Choose your problem statement or use-case</li>
+        <li>Stage 2 — Design the Solution (30 min): Build a system architecture addressing scalability, security & logic</li>
+        <li>Stage 3 — The Pitch (90 sec): Verbal defense to the judges panel</li>
+        <li>Judged on: Scalability · Security · Logical Architecture Structure</li>
+      </ul>
+      <div class="survival-badge">
+        <span class="survival-badge-icon">⚠</span>
+        <span class="survival-badge-text">Outcome: Top 5 Finalists Selected</span>
+      </div>
+    </div>
+
+    <!-- Round 4 -->
+    <div class="round-card finale">
+      <div class="round-num-bg">IV</div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start">
+        <div>
+          <div class="round-badge">
+            <span class="round-badge-num">Round 04 · The Finale</span>
+            <span class="round-badge-label">Live On Stage · Full Audience</span>
+          </div>
+          <div class="round-title">The Victor's Podium</div>
+          <div class="round-sub">// The Final Showdown · Spotlighted Stage //</div>
+          <div class="tag-group">
+            <span class="tag">5 Finalists</span><span class="tag">Live Judging</span><span class="tag">Rapid Fire</span><span class="tag">Single Podium</span>
+          </div>
+          <p class="round-desc">The Final Five take the stage in front of the full audience. There is no shield. No preparation time. Only clarity, depth, and composure can crown a Victor.</p>
+          <ul class="round-details">
+            <li>5 finalists compete simultaneously on the spotlighted main stage</li>
+            <li>Stump the Architect — rapid-fire technical questions on depth & quick thinking</li>
+            <li>Live audience and judge evaluation in real time</li>
+            <li>Winner evaluated on clarity, technical depth, and handling surprise questions</li>
+          </ul>
+          <div class="survival-badge gold-badge">
+            <span class="survival-badge-icon">👑</span>
+            <span class="survival-badge-text">Outcome: 1 Victor Crowned · AWS Winner's Badge</span>
+          </div>
+        </div>
+        <div style="text-align:center;padding:1rem">
+          <div style="font-size:3rem;margin-bottom:1rem;animation:crownFloat 2s ease-in-out infinite">👑</div>
+          <div style="font-family:'Cinzel Decorative',serif;font-size:0.8rem;color:var(--gold);margin-bottom:1rem">Final Five</div>
+          <div style="display:flex;flex-direction:column;gap:0.4rem">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.3rem 0.8rem;text-align:center">T1</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.3rem 0.8rem;text-align:center">T2</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.3rem 0.8rem;text-align:center">T3</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.3rem 0.8rem;text-align:center">T4</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.3rem 0.8rem;text-align:center">T5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPONSOR PARACHUTES -->
+<section class="sponsor-section">
+  <span class="section-tag">Capitol's Aid</span>
+  <h2 class="section-title" style="margin-bottom:2rem">Sponsor's Parachutes</h2>
+  <div class="parachutes">
+    <div class="parachute">
+      <span class="parachute-icon">☂</span>
+      <div class="parachute-title">Sponsor's Parachute #1</div>
+      <p class="parachute-desc">Arrives after Round 1. The Capitol rewards the surviving 60 with a special gift — bonus resources before the Logic Labyrinth.</p>
+    </div>
+    <div class="parachute">
+      <span class="parachute-icon">☂</span>
+      <div class="parachute-title">Sponsor's Parachute #2</div>
+      <p class="parachute-desc">Arrives after Round 2. The Capitol blesses the 20 Semifinalists before they face the Mockingjay's Blueprint challenge.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section class="section" id="leaderboard">
+  <span class="section-tag">The Capitol's Eye</span>
+  <h2 class="section-title">Leaderboard</h2>
+  <p class="section-subtitle">Current Survival Rankings · Updated Live</p>
+  <div class="divider"><div class="divider-line"></div><div class="divider-icon">◆</div><div class="divider-line"></div></div>
+
+  <div style="display:flex;justify-content:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
+    <div class="live-badge"><div class="live-dot"></div>Live Rankings</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem">
+      Current Phase: <span id="currentPhaseLabel" style="color:var(--gold)">Registration Open</span>
+    </div>
+  </div>
+
+  <div class="leaderboard" id="leaderboardContainer">
+    <div style="text-align:center;padding:3rem;color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:0.75rem">
+      ⏳ Rankings will appear here once the event begins.<br>The Capitol is watching.
+    </div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section class="register-section" id="register">
+  <span class="section-tag">Join the Games</span>
+  <h2 class="section-title">Enter the Arena</h2>
+  <p class="section-subtitle">The Capitol is watching. Register before the gates close forever.</p>
+
+  <div class="auth-banner">
+    <div>
+      <div class="auth-title">Continue with Google</div>
+      <div class="auth-copy">Use your college Google account first. Signing in creates your Tribute ID immediately. USN, branch, year, and phone can be completed later.</div>
+      <div class="auth-note" id="authStatusText">Status: Not signed in</div>
+    </div>
+    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:flex-end">
+      <button class="google-btn" id="googleAuthBtn" onclick="signInWithGoogle()">Continue with Google</button>
+      <button class="btn-secondary" id="googleSignOutBtn" onclick="signOutGoogle()" style="display:none;padding:1rem 1.2rem">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="status-panel" id="studentStatusPanel">
+    <div class="status-panel-head">
+      <div>
+        <div class="status-panel-title">My Tribute Status</div>
+        <div class="status-panel-sub">Sign in to see your current registration and round state</div>
+      </div>
+      <div class="live-badge"><div class="live-dot"></div>Auto-updated</div>
+    </div>
+    <div class="status-grid" id="studentStatusGrid"></div>
+  </div>
+
+  <div class="reg-info-grid">
+    <div class="reg-info-item">
+      <span class="reg-icon">📅</span>
+      <span class="reg-label">Registration Deadline</span>
+      <span class="reg-value" id="regDeadlineDisplay">TBD</span>
+    </div>
+    <div class="reg-info-item">
+      <span class="reg-icon">⚡</span>
+      <span class="reg-label">Main Event</span>
+      <span class="reg-value" id="regEventDisplay">TBD</span>
+    </div>
+    <div class="reg-info-item">
+      <span class="reg-icon">📍</span>
+      <span class="reg-label">Venue</span>
+      <span class="reg-value" id="regVenueDisplay">Your College</span>
+    </div>
+    <div class="reg-info-item">
+      <span class="reg-icon">🏆</span>
+      <span class="reg-label">Prize</span>
+      <span class="reg-value">AWS Winner's Badge</span>
+    </div>
+  </div>
+
+  <div class="reg-form">
+    <div class="form-msg" style="height:auto;margin-bottom:1rem;color:var(--gold)">No payment required. This is a free event. Sign in first to get your Tribute ID, then fill the remaining details whenever you are ready.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name (from Google)</label>
+        <input class="form-input" id="regName" type="text" placeholder="Sign in with Google to auto-fill" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">USN / Roll No</label>
+        <input class="form-input" id="regUSN" type="text" placeholder="e.g. 1XX22CS001">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Email Address (from Google)</label>
+        <input class="form-input" id="regEmail" type="email" placeholder="Sign in with Google to auto-fill" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" id="regPhone" type="tel" placeholder="10-digit number">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Branch / Department</label>
+        <select class="form-select" id="regBranch">
+          <option value="">Select branch</option>
+          <option>CSE</option><option>ISE</option><option>ECE</option>
+          <option>EEE</option><option>ME</option><option>CV</option>
+          <option>AI & ML</option><option>Data Science</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year of Study</label>
+        <select class="form-select" id="regYear">
+          <option value="">Select year</option>
+          <option>1st Year</option><option>2nd Year</option>
+          <option>3rd Year</option><option>4th Year</option>
+        </select>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="handleRegister()">⚡ Save My Tribute ID</button>
+    <div class="form-msg" id="regMsg"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">The Hunger Games · VVCE</div>
+  <div class="footer-inst" id="footerInst">
+    AWS Cloud Club VVCE · Your Institution<br>
+    Your City<br>
+    An AWS Cloud Club Initiative
+  </div>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#rounds">Rounds</a>
+    <a href="#register">Register</a>
+    <a id="footerInstaLink" href="#" target="_blank">Instagram</a>
+    <a id="footerEmailLink" href="#">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 AWS Cloud Club VVCE · Survival of the Smartest · May the odds be ever in your favour</div>
+</footer>
+
+<!-- REGISTRATION SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <span class="modal-icon">🏹</span>
+    <div class="modal-title">You Are Reaped!</div>
+    <p class="modal-text">Your entry has been recorded by the Capitol. Save your Tribute ID — you will need it to enter the Arena.</p>
+    <span class="modal-id" id="tributeIdDisplay">HG-000000</span>
+    <p class="modal-text" style="font-size:0.75rem;margin-bottom:1rem">Check your email for confirmation. Join the WhatsApp Command Center for live briefings.</p>
+    <button class="modal-close-btn" onclick="closeModal('successModal')">May The Odds Be With You</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <div class="admin-title">⚙ Capitol's Command Center</div>
+      <button class="admin-close" onclick="closeAdmin()">✕</button>
+    </div>
+    <div id="adminLoginSection" style="padding:2rem">
+      <div class="admin-login-form">
+        <div style="text-align:center;margin-bottom:2rem">
+          <div style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;color:var(--text-muted);text-transform:uppercase">Restricted Access · Organizers Only</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Admin Password</label>
+          <input class="form-input" id="adminPwd" type="password" placeholder="Enter Capitol password" onkeydown="if(event.key==='Enter')verifyAdmin()">
+        </div>
+        <button class="submit-btn" onclick="verifyAdmin()">Access Command Center</button>
+        <div class="form-msg" id="adminLoginMsg" style="margin-top:0.8rem;text-align:center"></div>
+      </div>
+    </div>
+    <div id="adminDashboard" style="display:none">
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchTab('overview')">Overview</button>
+        <button class="admin-tab" onclick="switchTab('tributes')">Tributes</button>
+        <button class="admin-tab" onclick="switchTab('rounds')">Round Control</button>
+        <button class="admin-tab" onclick="switchTab('leaderboard')">Leaderboard</button>
+        <button class="admin-tab" onclick="switchTab('settings')">Settings</button>
+      </div>
+      <div class="admin-body">
+
+        <!-- OVERVIEW -->
+        <div class="admin-section active" id="tab-overview">
+          <div class="admin-stat-grid" id="adminStatsGrid"></div>
+          <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);margin-bottom:1rem;letter-spacing:0.1em">Recent Registrations</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="recentTable">
+              <thead><tr><th>Tribute ID</th><th>Name</th><th>Branch</th><th>Status</th></tr></thead>
+              <tbody id="recentTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TRIBUTES -->
+        <div class="admin-section" id="tab-tributes">
+          <div class="admin-controls">
+            <input class="admin-input" id="searchInput" type="text" placeholder="Search by name, USN, branch..." oninput="renderTributeTable()">
+            <select class="admin-input" id="filterRound" onchange="renderTributeTable()" style="max-width:160px">
+              <option value="">All Rounds</option>
+              <option value="registered">Registered</option>
+              <option value="qualified">Qualified (R1)</option>
+              <option value="r2">Semifinalist (R2)</option>
+              <option value="r3">Finalist (R3)</option>
+              <option value="victor">Victor</option>
+              <option value="eliminated">Eliminated</option>
+            </select>
+            <button class="admin-btn admin-btn-success" onclick="exportCSV()">↓ Export CSV</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>#</th><th>Tribute ID</th><th>Name</th><th>USN</th><th>Branch</th><th>Year</th><th>Status</th><th>Score</th><th>Actions</th></tr></thead>
+              <tbody id="tributeTableBody"></tbody>
+            </table>
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-muted);margin-top:1rem" id="tributeCount"></div>
+        </div>
+
+        <!-- ROUNDS CONTROL -->
+        <div class="admin-section" id="tab-rounds">
+          <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);margin-bottom:1.5rem;letter-spacing:0.1em">Active Phase Control</div>
+          <div id="roundControlsContainer"></div>
+        </div>
+
+        <!-- LEADERBOARD ADMIN -->
+        <div class="admin-section" id="tab-leaderboard">
+          <div class="admin-controls">
+            <button class="admin-btn admin-btn-primary" onclick="renderAdminLeaderboard()">↻ Refresh</button>
+            <button class="admin-btn admin-btn-success" onclick="crownVictor()">👑 Crown Victor</button>
+            <button class="admin-btn admin-btn-danger" onclick="clearVictor()">↺ Clear Victor</button>
+          </div>
+          <div id="adminLbContainer" class="leaderboard" style="margin-top:1rem"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="admin-section" id="tab-settings">
+          <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);margin-bottom:1.5rem;letter-spacing:0.1em">Event Configuration</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Institution Name</label>
+                <input class="admin-input" id="cfg_inst" type="text" placeholder="e.g. DBIT, Bengaluru">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Event Venue</label>
+                <input class="admin-input" id="cfg_venue" type="text" placeholder="e.g. Main Auditorium, Block A">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Event Date (Main)</label>
+                <input class="admin-input" id="cfg_eventdate" type="date">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Registration Deadline</label>
+                <input class="admin-input" id="cfg_deadline" type="date">
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label class="form-label">Instagram Handle</label>
+                <input class="admin-input" id="cfg_insta" type="text" placeholder="@awscloudclub_yourclub">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Contact Email</label>
+                <input class="admin-input" id="cfg_email" type="email" placeholder="awsclub@college.edu">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Registration Fee (₹)</label>
+                <input class="admin-input" id="cfg_fee" type="number" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Max Tributes</label>
+                <input class="admin-input" id="cfg_max" type="number" placeholder="150">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Allowed College Email Domain</label>
+                <input class="admin-input" id="cfg_domain" type="text" placeholder="vvce.ac.in">
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap">
+            <button class="admin-btn admin-btn-primary" onclick="saveConfig()">Save Configuration</button>
+            <button class="admin-btn admin-btn-danger" onclick="if(confirm('Reset ALL data? This cannot be undone.'))resetAll()">⚠ Reset All Data</button>
+          </div>
+          <div id="cfgMsg" class="form-msg" style="text-align:left;margin-top:0.8rem"></div>
+
+          <div style="margin-top:2rem;border-top:1px solid rgba(201,168,76,0.15);padding-top:2rem">
+            <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);margin-bottom:1rem;letter-spacing:0.1em">Round Links</div>
+            <div style="display:grid;gap:0.8rem">
+              <div class="form-group">
+                <label class="form-label">Round 1 Quiz Link (Bloodbath)</label>
+                <input class="admin-input" id="cfg_r1link" type="url" placeholder="https://forms.google.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Round 2 Logic Form Link (Tracker Jacker)</label>
+                <input class="admin-input" id="cfg_r2link" type="url" placeholder="https://forms.google.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">WhatsApp Group Link</label>
+                <input class="admin-input" id="cfg_wa" type="url" placeholder="https://chat.whatsapp.com/...">
+              </div>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveLinks()" style="margin-top:0.8rem">Save Links</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics-compat.js"></script>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const ADMIN_PWD = 'arena2026';
+
+// TODO: Replace this config with your Firebase project's Web App config.
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCD9PmBbo0b0ppyLI4_YPbE2GabBlgEkOQ',
+  authDomain: 'hunger-game-f3dd9.firebaseapp.com',
+  projectId: 'hunger-game-f3dd9',
+  storageBucket: 'hunger-game-f3dd9.firebasestorage.app',
+  messagingSenderId: '1049767492920',
+  appId: '1:1049767492920:web:90b56d659f423ff9b2d5cd',
+  measurementId: 'G-6F20M5SGSQ'
+};
+const FIREBASE_COLLECTION = 'hungerGames';
+const FIREBASE_DOC_ID = 'event-main';
+
+let state = loadState();
+let auth = null;
+let db = null;
+let googleProvider = null;
+let analytics = null;
+let authUser = null;
+let firebaseReady = false;
+let syncTimer = null;
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('hg_state');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return {
+    config: {
+      inst: 'AWS Cloud Club VVCE',
+      venue: 'Main Auditorium',
+      eventDate: '',
+      deadline: '',
+      insta: '@awscloudclub_vvce',
+      email: 'awsclub@college.edu',
+      fee: 0,
+      maxTributes: 150,
+      allowedEmailDomain: 'vvce.ac.in',
+      r1link: '',
+      r2link: '',
+      waLink: ''
+    },
+    tributes: [],
+    currentPhase: 'registration', // registration | r1 | r2 | r3 | r4 | ended
+    victor: null
+  };
+}
+
+function saveState() {
+  try { localStorage.setItem('hg_state', JSON.stringify(state)); } catch(e) {}
+  queueCloudSync();
+}
+
+function generateTributeId() {
+  return 'HG-' + String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function findTributeByUid(uid) {
+  return state.tributes.find(t => t.uid === uid);
+}
+
+function findTributeByEmail(email) {
+  return state.tributes.find(t => (t.email || '').toLowerCase() === (email || '').toLowerCase());
+}
+
+function getOrCreateTributeDraft(user) {
+  let tribute = findTributeByUid(user.uid) || findTributeByEmail(user.email);
+  if(tribute) {
+    tribute.uid = user.uid;
+    tribute.name = user.displayName || tribute.name || '';
+    tribute.email = (user.email || tribute.email || '').toLowerCase();
+    tribute.photoURL = user.photoURL || tribute.photoURL || '';
+    if(!tribute.id) tribute.id = generateTributeId();
+    if(!tribute.status || tribute.status === 'pending') tribute.status = 'pending';
+  } else {
+    tribute = {
+      id: generateTributeId(),
+      uid: user.uid,
+      name: user.displayName || '',
+      usn: '',
+      email: (user.email || '').toLowerCase(),
+      phone: '',
+      branch: '',
+      year: '',
+      photoURL: user.photoURL || '',
+      status: 'pending',
+      score: 0,
+      round: 0,
+      registeredAt: new Date().toISOString()
+    };
+    state.tributes.push(tribute);
+  }
+  return tribute;
+}
+
+function getSignedInTribute() {
+  if(!authUser) return null;
+  return findTributeByUid(authUser.uid) || findTributeByEmail(authUser.email);
+}
+
+function roundLabelForStatus(status) {
+  if(status === 'qualified') return 'Round 1';
+  if(status === 'r2') return 'Round 2';
+  if(status === 'r3') return 'Round 3';
+  if(status === 'victor') return 'Victor';
+  if(status === 'pending') return 'Profile Pending';
+  if(status === 'registered') return 'Registered';
+  if(status === 'eliminated') return 'Eliminated';
+  return 'Unknown';
+}
+
+function renderStudentStatusCard() {
+  const grid = document.getElementById('studentStatusGrid');
+  if(!grid) return;
+
+  const tribute = getSignedInTribute();
+  if(!authUser) {
+    grid.innerHTML = `
+      <div class="status-chip">
+        <span class="status-chip-label">Login</span>
+        <div class="status-chip-value">Sign in with Google to see your Tribute ID and status.</div>
+      </div>
+      <div class="status-chip">
+        <span class="status-chip-label">Current State</span>
+        <div class="status-chip-value">Waiting for sign-in</div>
+      </div>
+    `;
+    return;
+  }
+
+  const completeness = [tribute?.usn, tribute?.branch, tribute?.year, tribute?.phone].filter(Boolean).length;
+  const profileState = completeness === 4 ? 'Profile Complete' : 'Profile In Progress';
+  const profileComplete = completeness === 4;
+  const nextStepMessage = profileComplete
+    ? 'Profile complete. You are fully registered and will be moved through round updates by organizers.'
+    : 'Complete USN, branch, year, and phone';
+  grid.innerHTML = `
+    <div class="status-chip">
+      <span class="status-chip-label">Tribute ID</span>
+      <div class="status-chip-value"><strong>${escapeHTML(tribute?.id || 'Generating...')}</strong></div>
+    </div>
+    <div class="status-chip">
+      <span class="status-chip-label">Registration Status</span>
+      <div class="status-chip-value"><strong>${escapeHTML(tribute?.status || 'pending')}</strong> · ${escapeHTML(roundLabelForStatus(tribute?.status || 'pending'))}</div>
+    </div>
+    <div class="status-chip">
+      <span class="status-chip-label">Profile</span>
+      <div class="status-chip-value">${escapeHTML(profileState)} · ${completeness}/4 fields done</div>
+    </div>
+    <div class="status-chip">
+      <span class="status-chip-label">Next Step</span>
+      <div class="status-chip-value">${escapeHTML(nextStepMessage)}</div>
+    </div>
+  `;
+}
+
+function hasFirebaseConfig() {
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('REPLACE_');
+}
+
+function initFirebase() {
+  if(!window.firebase || !hasFirebaseConfig()) {
+    updateAuthUI();
+    return;
+  }
+  try {
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    auth = firebase.auth();
+    auth.useDeviceLanguage();
+    db = firebase.firestore();
+    try { analytics = firebase.analytics(); } catch (e) { analytics = null; }
+    googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    firebaseReady = true;
+
+    auth.onAuthStateChanged(async (user) => {
+      authUser = user || null;
+      updateAuthUI();
+      if(firebaseReady) await syncStateFromCloud();
+    });
+  } catch (e) {
+    console.error(e);
+    firebaseReady = false;
+    showToast('Firebase init failed. Running in local fallback mode.', 'error');
+    updateAuthUI();
+  }
+}
+
+function isHttpContext() {
+  return location.protocol === 'http:' || location.protocol === 'https:';
+}
+
+function explainGoogleAuthError(error) {
+  const code = error?.code || 'unknown';
+  if(code === 'auth/popup-blocked') {
+    return 'Popup blocked by browser. Allow popups for this site and try again.';
+  }
+  if(code === 'auth/popup-closed-by-user') {
+    return 'Sign-in popup was closed before completion.';
+  }
+  if(code === 'auth/unauthorized-domain') {
+    return 'Current domain is not authorized in Firebase Auth. Add this domain in Firebase Console > Authentication > Settings > Authorized domains.';
+  }
+  if(code === 'auth/operation-not-allowed') {
+    return 'Google sign-in is not enabled in Firebase. Enable it in Authentication > Sign-in method.';
+  }
+  if(code === 'auth/operation-not-supported-in-this-environment') {
+    return 'This environment does not support popup auth. Use localhost or a deployed HTTPS URL.';
+  }
+  if(code === 'auth/network-request-failed') {
+    return 'Network error while contacting Google/Firebase. Check internet and retry.';
+  }
+  if(code === 'auth/invalid-api-key') {
+    return 'Firebase API key is invalid. Verify FIREBASE_CONFIG values.';
+  }
+  return `Google sign-in failed (${code}). Check Firebase Auth setup and authorized domain.`;
+}
+
+function queueCloudSync() {
+  if(!firebaseReady || !db) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushStateToCloud, 350);
+}
+
+async function pushStateToCloud() {
+  if(!firebaseReady || !db) return;
+  try {
+    await db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).set({
+      ...state,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function syncStateFromCloud() {
+  if(!firebaseReady || !db) return;
+  try {
+    const snap = await db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC_ID).get();
+    if(snap.exists) {
+      const remote = snap.data() || {};
+      state = {
+        ...state,
+        ...remote,
+        config: { ...state.config, ...(remote.config || {}) },
+        tributes: Array.isArray(remote.tributes) ? remote.tributes : state.tributes
+      };
+      localStorage.setItem('hg_state', JSON.stringify(state));
+      rerenderAfterSync();
+    } else {
+      await pushStateToCloud();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function rerenderAfterSync() {
+  applyConfig();
+  renderPublicLeaderboard();
+  renderStudentStatusCard();
+  document.getElementById('currentPhaseLabel').textContent = phaseLabel(state.currentPhase);
+  document.getElementById('heroTributes').textContent = state.tributes.length;
+  if(document.getElementById('adminDashboard').style.display === 'block') {
+    renderOverview();
+    renderTributeTable();
+    renderRoundControls();
+    renderAdminLeaderboard();
+  }
+}
+
+function escapeHTML(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function csvCell(value) {
+  const text = String(value ?? '');
+  if(/[\",\n\r]/.test(text)) return `"${text.replace(/\"/g, '""')}"`;
+  return text;
+}
+
+// ═══════════════════════════════════════════
+//  FIRE CANVAS
+// ═══════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('fire-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  class P {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random()*W; this.y = H+10;
+      this.vx = (Math.random()-.5)*.8; this.vy = -(Math.random()*2+1);
+      this.life = 1; this.decay = Math.random()*.007+.003;
+      this.size = Math.random()*4+1; this.hue = Math.random()*25+8;
+    }
+    update() {
+      this.x+=this.vx; this.y+=this.vy; this.vy-=.01;
+      this.life-=this.decay; this.vx+=(Math.random()-.5)*.1;
+      if(this.life<=0) this.reset();
+    }
+    draw() {
+      ctx.save(); ctx.globalAlpha=this.life*.5;
+      const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*3);
+      g.addColorStop(0,`hsl(${this.hue+50},100%,90%)`);
+      g.addColorStop(.4,`hsl(${this.hue+20},100%,60%)`);
+      g.addColorStop(1,`hsla(${this.hue},100%,30%,0)`);
+      ctx.fillStyle=g; ctx.beginPath();
+      ctx.arc(this.x,this.y,this.size*3,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  }
+  for(let i=0;i<36;i++){const p=new P();p.y=Math.random()*H;particles.push(p);}
+  function loop(){ctx.clearRect(0,0,W,H);particles.forEach(p=>{p.update();p.draw();});requestAnimationFrame(loop);}
+  loop();
+})();
+
+// ═══════════════════════════════════════════
+//  SCROLL REVEAL
+// ═══════════════════════════════════════════
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.flow-item,.round-card,.parachute').forEach(el => revealObs.observe(el));
+
+// ═══════════════════════════════════════════
+//  REGISTRATION
+// ═══════════════════════════════════════════
+function handleRegister() {
+  if(!authUser) {
+    const msg = document.getElementById('regMsg');
+    msg.className='form-msg error';
+    msg.textContent='Sign in with your college Google account first.';
+    return;
+  }
+
+  const tribute = getOrCreateTributeDraft(authUser);
+  const name = (authUser?.displayName || tribute.name || '').trim();
+  const usn = document.getElementById('regUSN').value.trim();
+  const email = (authUser?.email || '').trim().toLowerCase();
+  const phone = document.getElementById('regPhone').value.trim();
+  const branch = document.getElementById('regBranch').value;
+  const year = document.getElementById('regYear').value;
+  const msg = document.getElementById('regMsg');
+
+  const requiredDomain = (state.config.allowedEmailDomain || 'vvce.ac.in').toLowerCase();
+  if(!email.endsWith(`@${requiredDomain}`)) {
+    msg.className='form-msg error';
+    msg.textContent=`Use your college account (@${requiredDomain}) to register.`;
+    return;
+  }
+
+  if(!usn && !phone && !branch && !year) {
+    tribute.name = name;
+    tribute.email = email;
+    saveState();
+    document.getElementById('tributeIdDisplay').textContent = tribute.id;
+    document.getElementById('successModal').classList.add('open');
+    document.getElementById('heroTributes').textContent = state.tributes.length;
+    msg.className='form-msg success';
+    msg.textContent='Your Tribute ID is ready. You can complete the remaining fields later.';
+    renderPublicLeaderboard();
+    return;
+  }
+
+  if(usn && state.tributes.find(t=>t.usn.toLowerCase()===usn.toLowerCase() && t.id !== tribute.id)) {
+    msg.className='form-msg error'; msg.textContent='This USN is already registered.'; return;
+  }
+  if(phone && !/^\d{10}$/.test(phone.replace(/\D/g, ''))) {
+    msg.className='form-msg error'; msg.textContent='Enter a valid 10-digit phone number.'; return;
+  }
+  if(phone && state.tributes.find(t=>String(t.phone).replace(/\D/g,'')===phone.replace(/\D/g,'') && t.id !== tribute.id)) {
+    msg.className='form-msg error'; msg.textContent='This phone number is already registered.'; return;
+  }
+  if(state.tributes.length >= state.config.maxTributes && !state.tributes.find(t=>t.id===tribute.id)) {
+    msg.className='form-msg error'; msg.textContent='The Arena is full. Registrations closed.'; return;
+  }
+
+  tribute.name = name;
+  tribute.usn = usn || tribute.usn || '';
+  tribute.email = email;
+  tribute.phone = phone || tribute.phone || '';
+  tribute.branch = branch || tribute.branch || '';
+  tribute.year = year || tribute.year || '';
+  tribute.status = [tribute.usn, tribute.branch, tribute.year, tribute.phone].every(Boolean) ? 'registered' : 'pending';
+  saveState();
+
+  document.getElementById('tributeIdDisplay').textContent = tribute.id;
+  document.getElementById('successModal').classList.add('open');
+  document.getElementById('heroTributes').textContent = state.tributes.length;
+
+  ['regUSN','regPhone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('regBranch').value='';
+  document.getElementById('regYear').value='';
+  msg.className='form-msg success';
+  msg.textContent='Your details were saved. You can edit them later if needed.';
+  renderStudentStatusCard();
+  renderPublicLeaderboard();
+}
+
+async function signInWithGoogle() {
+  if(!firebaseReady || !auth || !googleProvider) {
+    showToast('Firebase is not configured yet. Add Firebase keys in code first.', 'error');
+    return;
+  }
+  if(!isHttpContext()) {
+    showToast('Open this page via localhost or HTTPS. Google auth usually fails on file://.', 'error');
+    return;
+  }
+  try {
+    const result = await auth.signInWithPopup(googleProvider);
+    const user = result?.user || auth.currentUser;
+    if(!user) throw new Error('No user returned from Firebase sign-in');
+    const tribute = getOrCreateTributeDraft(user);
+    saveState();
+    document.getElementById('tributeIdDisplay').textContent = tribute.id;
+    document.getElementById('successModal').classList.add('open');
+    showToast(`Tribute ID assigned: ${tribute.id}`, 'success');
+  } catch (e) {
+    console.error(e);
+    if(e?.code === 'auth/popup-blocked' || e?.code === 'auth/cancelled-popup-request') {
+      try {
+        await auth.signInWithRedirect(googleProvider);
+        return;
+      } catch (redirectErr) {
+        console.error(redirectErr);
+        showToast(explainGoogleAuthError(redirectErr), 'error');
+        return;
+      }
+    }
+    showToast(explainGoogleAuthError(e), 'error');
+  }
+}
+
+async function signOutGoogle() {
+  if(!auth) return;
+  try {
+    await auth.signOut();
+    showToast('Signed out', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Sign out failed', 'error');
+  }
+}
+
+function updateAuthUI() {
+  const statusEl = document.getElementById('authStatusText');
+  const signInBtn = document.getElementById('googleAuthBtn');
+  const signOutBtn = document.getElementById('googleSignOutBtn');
+  const nameInput = document.getElementById('regName');
+  const emailInput = document.getElementById('regEmail');
+
+  if(!statusEl || !signInBtn || !signOutBtn || !nameInput || !emailInput) return;
+
+  if(authUser) {
+    nameInput.value = authUser.displayName || '';
+    emailInput.value = authUser.email || '';
+    statusEl.textContent = `Status: Signed in as ${authUser.email}`;
+    signInBtn.style.display = 'none';
+    signOutBtn.style.display = 'inline-flex';
+  } else {
+    nameInput.value = '';
+    emailInput.value = '';
+    if(!hasFirebaseConfig()) {
+      statusEl.textContent = 'Status: Firebase not configured yet';
+    } else if(!isHttpContext()) {
+      statusEl.textContent = 'Status: Open via localhost/HTTPS for Google login';
+    } else {
+      statusEl.textContent = 'Status: Not signed in';
+    }
+    signInBtn.style.display = 'inline-flex';
+    signOutBtn.style.display = 'none';
+  }
+  renderStudentStatusCard();
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el => el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); }));
+
+// ═══════════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════════
+function openAdmin() {
+  document.getElementById('adminOverlay').classList.add('open');
+  document.getElementById('adminLoginSection').style.display='block';
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('adminPwd').value='';
+  document.getElementById('adminLoginMsg').textContent='';
+}
+function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); }
+document.getElementById('adminOverlay').addEventListener('click', e => { if(e.target===document.getElementById('adminOverlay')) closeAdmin(); });
+function openAdminFromHash() {
+  if(location.hash === '#admin' || location.hash === '#organizer') {
+    openAdmin();
+  }
+}
+document.addEventListener('keydown', (event) => {
+  if(event.ctrlKey && event.altKey && event.key.toLowerCase() === 'a') {
+    event.preventDefault();
+    openAdmin();
+  }
+});
+window.addEventListener('hashchange', openAdminFromHash);
+
+function verifyAdmin() {
+  const pwd = document.getElementById('adminPwd').value;
+  const msg = document.getElementById('adminLoginMsg');
+  if(pwd === ADMIN_PWD) {
+    document.getElementById('adminLoginSection').style.display='none';
+    document.getElementById('adminDashboard').style.display='block';
+    loadConfig(); renderOverview(); renderTributeTable(); renderRoundControls(); renderAdminLeaderboard();
+  } else {
+    msg.className='form-msg error'; msg.textContent='Invalid password. The Capitol denies you access.';
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    const tabs = ['overview','tributes','rounds','leaderboard','settings'];
+    t.classList.toggle('active', tabs[i]===name);
+  });
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ─── OVERVIEW ───
+function renderOverview() {
+  const t = state.tributes;
+  const active = t.filter(x=>!['eliminated'].includes(x.status)).length;
+  const eliminated = t.filter(x=>x.status==='eliminated').length;
+  document.getElementById('adminStatsGrid').innerHTML = `
+    <div class="admin-stat-card"><span class="admin-stat-val">${t.length}</span><span class="admin-stat-lbl">Registered</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-val">${active}</span><span class="admin-stat-lbl">Active</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-val">${eliminated}</span><span class="admin-stat-lbl">Eliminated</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-val">${phaseLabel(state.currentPhase)}</span><span class="admin-stat-lbl">Current Phase</span></div>
+  `;
+  const recent = [...t].reverse().slice(0,8);
+  document.getElementById('recentTbody').innerHTML = recent.map(r => `
+    <tr>
+      <td>${escapeHTML(r.id)}</td>
+      <td>${escapeHTML(r.name)}</td>
+      <td>${escapeHTML(r.branch)}</td>
+      <td><span class="status-badge ${statusClass(r.status)}">${escapeHTML(r.status)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function phaseLabel(p) {
+  return {registration:'Registration',r1:'Round 1',r2:'Round 2',r3:'Round 3',r4:'Finale',ended:'Ended'}[p]||p;
+}
+function statusClass(s) {
+  if(['qualified','r2','r3','victor'].includes(s)) return 'status-active';
+  if(s==='registered' || s==='pending') return 'status-pending';
+  return 'status-eliminated';
+}
+
+// ─── TRIBUTES TABLE ───
+function renderTributeTable() {
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  const f = document.getElementById('filterRound').value;
+  let data = state.tributes.filter(t => {
+    const match = !q || t.name.toLowerCase().includes(q) || t.usn.toLowerCase().includes(q) || t.branch.toLowerCase().includes(q) || t.id.toLowerCase().includes(q);
+    const roundMatch = !f || t.status===f;
+    return match && roundMatch;
+  });
+  document.getElementById('tributeCount').textContent = `Showing ${data.length} of ${state.tributes.length} tributes`;
+  document.getElementById('tributeTableBody').innerHTML = data.map((t,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${escapeHTML(t.id)}</td>
+      <td>${escapeHTML(t.name)}</td>
+      <td>${escapeHTML(t.usn)}</td>
+      <td>${escapeHTML(t.branch)}</td>
+      <td>${escapeHTML(t.year)}</td>
+      <td><span class="status-badge ${statusClass(t.status)}">${escapeHTML(t.status)}</span></td>
+      <td>${escapeHTML(t.score)}</td>
+      <td>
+        <button class="action-btn action-advance" onclick="advanceTribute('${t.id}')">▲</button>
+        <button class="action-btn action-eliminate" onclick="eliminateTribute('${t.id}')">✕</button>
+        <button class="action-btn" style="color:var(--text-muted);border-color:rgba(154,138,106,0.3)" onclick="editScore('${t.id}')">✎</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+const STATUS_ORDER = ['registered','qualified','r2','r3','victor'];
+function advanceTribute(id) {
+  const t = state.tributes.find(x=>x.id===id);
+  if(!t) return;
+  const idx = STATUS_ORDER.indexOf(t.status);
+  if(idx < STATUS_ORDER.length-1) { t.status = STATUS_ORDER[idx+1]; saveState(); renderTributeTable(); renderOverview(); showToast(`${t.name} advanced to ${t.status}`,'success'); }
+}
+function eliminateTribute(id) {
+  const t = state.tributes.find(x=>x.id===id);
+  if(!t) return;
+  t.status = 'eliminated'; saveState(); renderTributeTable(); renderOverview();
+  showToast(`${t.name} eliminated from the Arena`,'error');
+}
+function editScore(id) {
+  const t = state.tributes.find(x=>x.id===id);
+  if(!t) return;
+  const s = prompt(`Edit score for ${t.name} (current: ${t.score})`);
+  if(s!==null && !isNaN(s)) { t.score=parseInt(s); saveState(); renderTributeTable(); renderAdminLeaderboard(); }
+}
+
+// ─── BATCH ADVANCE ───
+function renderRoundControls() {
+  const phases = [
+    { id:'r1', label:'Round 1 · The Bloodbath', desc:'Move top 60 to Qualified status', from:'registered', to:'qualified', cutoff:60 },
+    { id:'r2', label:'Round 2 · Tracker Jacker Trial', desc:'Move top 20 to Semifinalist status', from:'qualified', to:'r2', cutoff:20 },
+    { id:'r3', label:'Round 3 · Mockingjay Blueprint', desc:'Move top 5 to Finalist status', from:'r2', to:'r3', cutoff:5 },
+    { id:'r4', label:'Round 4 · Victor\'s Podium', desc:'Crown the 1 Victor', from:'r3', to:'victor', cutoff:1 },
+  ];
+  document.getElementById('roundControlsContainer').innerHTML = phases.map(p => {
+    const pool = state.tributes.filter(t=>t.status===p.from).length;
+    const advanced = state.tributes.filter(t=>t.status===p.to).length;
+    const pct = p.cutoff > 0 ? Math.min(100, Math.round(advanced/p.cutoff*100)) : 0;
+    return `
+      <div class="round-control">
+        <div class="round-ctrl-header">
+          <div class="round-ctrl-title">${p.label}</div>
+          <span class="round-ctrl-status" style="color:var(--text-muted)">${advanced} / ${p.cutoff} advanced</span>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-muted);margin-bottom:0.8rem">${p.desc} · ${pool} eligible tributes</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+        <div style="display:flex;gap:0.8rem;margin-top:1rem;flex-wrap:wrap">
+          <button class="admin-btn admin-btn-success" onclick="batchAdvance('${p.from}','${p.to}',${p.cutoff})">▲ Advance Top ${p.cutoff}</button>
+          <button class="admin-btn admin-btn-primary" onclick="setPhase('${p.id}')">Set as Active Phase</button>
+          <button class="admin-btn admin-btn-danger" onclick="batchEliminate('${p.from}',${p.cutoff})">✕ Eliminate Rest</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function batchAdvance(from, to, cutoff) {
+  if(!confirm(`Advance top ${cutoff} from '${from}' to '${to}'?`)) return;
+  const pool = state.tributes.filter(t=>t.status===from).sort((a,b)=>b.score-a.score);
+  pool.slice(0,cutoff).forEach(t=>t.status=to);
+  saveState(); renderRoundControls(); renderTributeTable(); renderOverview(); renderAdminLeaderboard();
+  showToast(`${Math.min(cutoff,pool.length)} tributes advanced to ${to}`,'success');
+}
+function batchEliminate(from, cutoff) {
+  if(!confirm(`Eliminate tributes ranked below top ${cutoff} from '${from}'?`)) return;
+  const pool = state.tributes.filter(t=>t.status===from).sort((a,b)=>b.score-a.score);
+  pool.slice(cutoff).forEach(t=>t.status='eliminated');
+  saveState(); renderRoundControls(); renderTributeTable(); renderOverview();
+  showToast('Remaining tributes eliminated','error');
+}
+function setPhase(p) {
+  state.currentPhase = p; saveState();
+  document.getElementById('currentPhaseLabel').textContent = phaseLabel(p);
+  showToast(`Phase set to: ${phaseLabel(p)}`,'success');
+}
+
+// ─── LEADERBOARD ───
+function renderAdminLeaderboard() {
+  const sorted = [...state.tributes].filter(t=>t.status!=='eliminated').sort((a,b)=>b.score-a.score);
+  renderLeaderboardList(sorted, document.getElementById('adminLbContainer'));
+}
+function crownVictor() {
+  const victor = state.tributes.find(t=>t.status==='victor');
+  if(!victor) { showToast('No Victor yet! Advance a tribute to Victor status first.','error'); return; }
+  state.victor = victor; saveState();
+  renderPublicLeaderboard();
+  showToast(`👑 ${victor.name} CROWNED AS VICTOR!`,'success');
+  fireConfetti();
+}
+
+function clearVictor() {
+  if(!state.victor) {
+    showToast('No Victor is currently set.', 'error');
+    return;
+  }
+  if(!confirm('Clear the Victor and return the leaderboard to normal?')) return;
+  state.victor = null;
+  saveState();
+  renderPublicLeaderboard();
+  renderAdminLeaderboard();
+  showToast('Victor cleared. Leaderboard restored.', 'success');
+}
+
+function renderLeaderboardList(data, container) {
+  if(!data.length) { container.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:Share Tech Mono,monospace;font-size:0.75rem">No data yet</div>'; return; }
+  container.innerHTML = data.map((t,i) => `
+    <div class="lb-item">
+      <div class="lb-rank ${i===0?'top1':i===1?'top2':i===2?'top3':''}">${i===0?'👑':i+1}</div>
+      <div>
+        <div class="lb-name">${escapeHTML(t.name)}</div>
+        <div class="lb-college">${escapeHTML(t.branch)} · ${escapeHTML(t.year)}</div>
+      </div>
+      <div class="lb-round"><span class="status-badge ${statusClass(t.status)}">${escapeHTML(t.status)}</span></div>
+      <div class="lb-score">${escapeHTML(t.score)}</div>
+    </div>
+  `).join('');
+}
+
+function renderPublicLeaderboard() {
+  const container = document.getElementById('leaderboardContainer');
+  if(state.victor) {
+    container.innerHTML = `
+      <div class="winner-section">
+        <span class="crown-display">👑</span>
+        <div class="winner-name">${escapeHTML(state.victor.name)}</div>
+        <div class="winner-detail">${escapeHTML(state.victor.branch)} · ${escapeHTML(state.victor.year)} · ${escapeHTML(state.victor.id)}</div>
+        <div style="margin-top:1rem;font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase">Victor of The Hunger Games 2026</div>
+      </div>
+    `;
+    return;
+  }
+  const active = state.tributes.filter(t=>t.status!=='eliminated');
+  if(!active.length) {
+    container.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text-muted);font-family:Share Tech Mono,monospace;font-size:0.75rem">⏳ Rankings will appear here once the event begins.<br>The Capitol is watching.</div>';
+    return;
+  }
+  const sorted = [...active].sort((a,b)=>b.score-a.score);
+  renderLeaderboardList(sorted, container);
+}
+
+// ─── CONFIG ───
+function loadConfig() {
+  const c = state.config;
+  document.getElementById('cfg_inst').value = c.inst||'';
+  document.getElementById('cfg_venue').value = c.venue||'';
+  document.getElementById('cfg_eventdate').value = c.eventDate||'';
+  document.getElementById('cfg_deadline').value = c.deadline||'';
+  document.getElementById('cfg_insta').value = c.insta||'';
+  document.getElementById('cfg_email').value = c.email||'';
+  document.getElementById('cfg_fee').value = c.fee||0;
+  document.getElementById('cfg_max').value = c.maxTributes||150;
+  document.getElementById('cfg_domain').value = c.allowedEmailDomain||'vvce.ac.in';
+  document.getElementById('cfg_r1link').value = c.r1link||'';
+  document.getElementById('cfg_r2link').value = c.r2link||'';
+  document.getElementById('cfg_wa').value = c.waLink||'';
+}
+function saveConfig() {
+  state.config.inst = document.getElementById('cfg_inst').value;
+  state.config.venue = document.getElementById('cfg_venue').value;
+  state.config.eventDate = document.getElementById('cfg_eventdate').value;
+  state.config.deadline = document.getElementById('cfg_deadline').value;
+  state.config.insta = document.getElementById('cfg_insta').value;
+  state.config.email = document.getElementById('cfg_email').value;
+  state.config.fee = parseInt(document.getElementById('cfg_fee').value)||0;
+  state.config.maxTributes = parseInt(document.getElementById('cfg_max').value)||150;
+  state.config.allowedEmailDomain = document.getElementById('cfg_domain').value.trim().toLowerCase() || 'vvce.ac.in';
+  saveState(); applyConfig();
+  document.getElementById('cfgMsg').className='form-msg success';
+  document.getElementById('cfgMsg').textContent='Configuration saved. The Capitol has been updated.';
+  setTimeout(()=>document.getElementById('cfgMsg').textContent='',3000);
+  showToast('Configuration saved','success');
+}
+function saveLinks() {
+  state.config.r1link = document.getElementById('cfg_r1link').value;
+  state.config.r2link = document.getElementById('cfg_r2link').value;
+  state.config.waLink = document.getElementById('cfg_wa').value;
+  saveState(); showToast('Links saved','success');
+}
+
+function applyConfig() {
+  const c = state.config;
+  if(c.eventDate) document.getElementById('regEventDisplay').textContent = new Date(c.eventDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  if(c.deadline) document.getElementById('regDeadlineDisplay').textContent = new Date(c.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  if(c.venue) document.getElementById('regVenueDisplay').textContent = c.venue;
+  if(c.inst) document.getElementById('footerInst').innerHTML = `AWS Cloud Club VVCE · ${c.inst}<br>An AWS Cloud Club Initiative`;
+  if(c.insta) { document.getElementById('footerInstaLink').textContent=c.insta; document.getElementById('footerInstaLink').href=`https://instagram.com/${c.insta.replace('@','')}`; }
+  if(c.email) document.getElementById('footerEmailLink').href=`mailto:${c.email}`;
+  document.getElementById('heroTributes').textContent = state.tributes.length;
+}
+
+function resetAll() {
+  state.tributes = []; state.currentPhase='registration'; state.victor=null;
+  saveState(); renderOverview(); renderTributeTable(); renderRoundControls();
+  renderPublicLeaderboard(); showToast('All data reset','error');
+}
+
+function exportCSV() {
+  const headers = ['ID','Name','USN','Email','Phone','Branch','Year','Status','Score','Registered'];
+  const rows = state.tributes.map(t=>[t.id,t.name,t.usn,t.email,t.phone,t.branch,t.year,t.status,t.score,t.registeredAt]);
+  const csv = [headers,...rows].map(r=>r.map(csvCell).join(',')).join('\n');
+  const a = document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='hunger_games_tributes.csv'; a.click();
+}
+
+// ─── CONFETTI ───
+function fireConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.style.display='block';
+  const ctx = canvas.getContext('2d');
+  canvas.width = innerWidth; canvas.height = innerHeight;
+  const particles = [];
+  for(let i=0;i<200;i++) particles.push({
+    x:Math.random()*innerWidth, y:Math.random()*innerHeight-innerHeight,
+    vx:(Math.random()-.5)*3, vy:Math.random()*3+2,
+    r:Math.random()*6+2, c:[`#c9a84c`,`#e85d04`,`#cc2222`,`#f0d080`,`#ffffff`][Math.floor(Math.random()*5)],
+    rot:Math.random()*360, rv:(Math.random()-.5)*5
+  });
+  let frame=0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rv;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);
+      ctx.restore();
+    });
+    frame++;
+    if(frame<200) requestAnimationFrame(draw);
+    else { ctx.clearRect(0,0,canvas.width,canvas.height); canvas.style.display='none'; }
+  }
+  draw();
+}
+
+// ─── TOAST ───
+function showToast(msg, type='success') {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.className = `toast show ${type}-toast`;
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+// ─── INIT ───
+applyConfig();
+renderPublicLeaderboard();
+document.getElementById('currentPhaseLabel').textContent = phaseLabel(state.currentPhase);
+document.getElementById('heroTributes').textContent = state.tributes.length;
+updateAuthUI();
+initFirebase();
+openAdminFromHash();
+</script>
+</body>
+</html>
