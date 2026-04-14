@@ -1806,8 +1806,19 @@ function findTributeByEmail(email) {
   return state.tributes.find(t => (t.email || '').toLowerCase() === (email || '').toLowerCase());
 }
 
+function normalizeName(name) {
+  return String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function findTributeByName(name) {
+  const target = normalizeName(name);
+  if(!target) return null;
+  const matches = state.tributes.filter(t => normalizeName(t.name) === target);
+  return matches.length === 1 ? matches[0] : null;
+}
+
 function getOrCreateTributeDraft(user) {
-  let tribute = findTributeByUid(user.uid) || findTributeByEmail(user.email);
+  let tribute = findTributeByUid(user.uid) || findTributeByEmail(user.email) || findTributeByName(user.displayName);
   if(tribute) {
     tribute.uid = user.uid;
     tribute.name = user.displayName || tribute.name || '';
@@ -1838,10 +1849,10 @@ function getOrCreateTributeDraft(user) {
 
 function getSignedInTribute() {
   if(!authUser) return null;
-  let tribute = findTributeByUid(authUser.uid) || findTributeByEmail(authUser.email);
-  if(!tribute && authUser.email) {
-    tribute = getOrCreateTributeDraft(authUser);
-    saveState();
+  let tribute = findTributeByUid(authUser.uid) || findTributeByEmail(authUser.email) || findTributeByName(authUser.displayName);
+  if(tribute) {
+    if(!tribute.uid) tribute.uid = authUser.uid;
+    if(!tribute.email && authUser.email) tribute.email = String(authUser.email).toLowerCase();
   }
   return tribute;
 }
@@ -2433,7 +2444,10 @@ function batchEliminate(from, cutoff) {
   showToast('Remaining tributes eliminated','error');
 }
 function setPhase(p) {
-  state.currentPhase = p; saveState();
+  state.currentPhase = p;
+  const liveKey = getLiveRoundKeyForPhase(p);
+  if(liveKey) state.live.activeRound = liveKey;
+  saveState();
   document.getElementById('currentPhaseLabel').textContent = phaseLabel(p);
   showToast(`Phase set to: ${phaseLabel(p)}`,'success');
 }
@@ -2653,6 +2667,11 @@ function saveLiveRoundEditor(forcePublish, forceUnpublish) {
   else if(typeof forceUnpublish === 'boolean' && forceUnpublish) round.published = false;
   else round.published = document.getElementById('liveRoundPublished').checked;
 
+  if(round.published) {
+    state.live.activeRound = roundKey;
+    state.currentPhase = roundKey;
+  }
+
   round.questions = [...editor.querySelectorAll('.live-question-editor')].map((card) => {
     const prompt = card.querySelector('.live-q-prompt').value.trim();
     const type = card.querySelector('.live-q-type').value;
@@ -2700,7 +2719,9 @@ function renderLiveArena() {
   const section = document.getElementById('liveArena');
   if(!container || !section) return;
 
-  const roundKey = getLiveRoundKeyForPhase(state.currentPhase);
+  const phaseRound = getLiveRoundKeyForPhase(state.currentPhase);
+  const activeLive = state.live?.activeRound;
+  const roundKey = phaseRound || activeLive;
   if(!roundKey) {
     section.style.display = 'none';
     return;
