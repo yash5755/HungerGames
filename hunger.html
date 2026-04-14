@@ -2258,7 +2258,17 @@ function saveState() {
   queueCloudSync();
 }
 
-function generateTributeId() {
+function generateTributeId(seed) {
+  if(seed) {
+    let hash = 0;
+    for(let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    const num = Math.abs(hash) % 900000;
+    return 'HG-' + String(100000 + num);
+  }
   return 'HG-' + String(Math.floor(100000 + Math.random() * 900000));
 }
 
@@ -2393,12 +2403,13 @@ function getOrCreateTributeDraft(user) {
     tribute.name = user.displayName || tribute.name || '';
     tribute.email = (user.email || tribute.email || '').toLowerCase();
     tribute.photoURL = user.photoURL || tribute.photoURL || '';
-    if(!tribute.id) tribute.id = generateTributeId();
+    if(!tribute.id) tribute.id = generateTributeId(user.uid);
     if(!tribute.status || tribute.status === 'pending') tribute.status = 'pending';
     saveTributeIdToUidMapping(user.uid, tribute.id);
   } else {
+    const generatedId = generateTributeId(user.uid);
     tribute = {
-      id: generateTributeId(),
+      id: generatedId,
       uid: user.uid,
       name: user.displayName || '',
       usn: '',
@@ -2413,7 +2424,7 @@ function getOrCreateTributeDraft(user) {
       registeredAt: new Date().toISOString()
     };
     state.tributes.push(tribute);
-    saveTributeIdToUidMapping(user.uid, tribute.id);
+    saveTributeIdToUidMapping(user.uid, generatedId);
     queueCloudSync();
   }
   return tribute;
