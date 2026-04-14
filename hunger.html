@@ -2287,6 +2287,31 @@ function saveTributeIdToUidMapping(uid, tributeId) {
   } catch(e) {}
 }
 
+function getStatusRank(status) {
+  const order = ['pending','registered','qualified','r2','r3','victor'];
+  const idx = order.indexOf(String(status || '').toLowerCase());
+  return idx === -1 ? 0 : idx;
+}
+
+function getTributeQualityScore(t) {
+  const completeCount = [t?.usn, t?.phone, t?.branch, t?.year].filter(Boolean).length;
+  return (getStatusRank(t?.status) * 100) + (Number(t?.score || 0)) + (completeCount * 5) + (t?.uid ? 3 : 0);
+}
+
+function mergeTributeIntoTarget(target, source) {
+  if(!target || !source || target === source) return;
+  target.uid = target.uid || source.uid;
+  target.name = target.name || source.name;
+  target.email = target.email || source.email;
+  target.usn = target.usn || source.usn;
+  target.phone = target.phone || source.phone;
+  target.branch = target.branch || source.branch;
+  target.year = target.year || source.year;
+  target.photoURL = target.photoURL || source.photoURL;
+  target.score = Math.max(Number(target.score || 0), Number(source.score || 0));
+  if(getStatusRank(source.status) > getStatusRank(target.status)) target.status = source.status;
+}
+
 function rebuildUidToTributeIdMapping() {
   try {
     const mapping = {};
@@ -2313,13 +2338,10 @@ function deduplicateTributesbyUID() {
   let removed = false;
   Object.keys(byUID).forEach(uid => {
     if(byUID[uid].length > 1) {
-      const sorted = byUID[uid].sort((a, b) => {
-        const scoreA = (a.status === 'registered' ? 10 : a.status === 'qualified' ? 5 : 0) + (a.usn ? 2 : 0);
-        const scoreB = (b.status === 'registered' ? 10 : b.status === 'qualified' ? 5 : 0) + (b.usn ? 2 : 0);
-        return scoreB - scoreA;
-      });
+      const sorted = byUID[uid].sort((a, b) => getTributeQualityScore(b) - getTributeQualityScore(a));
       const keep = sorted[0];
       for(let i = 1; i < sorted.length; i++) {
+        mergeTributeIntoTarget(keep, sorted[i]);
         state.tributes = state.tributes.filter(t => t.id !== sorted[i].id);
         removed = true;
       }
@@ -2343,21 +2365,12 @@ function deduplicateTributesbyEmail() {
   let removed = false;
   Object.keys(byEmail).forEach(email => {
     if(byEmail[email].length > 1) {
-      const sorted = byEmail[email].sort((a, b) => {
-        const scoreA = (a.status === 'registered' ? 10 : a.status === 'qualified' ? 5 : 0) + (a.usn ? 2 : 0) + (a.uid ? 3 : 0);
-        const scoreB = (b.status === 'registered' ? 10 : b.status === 'qualified' ? 5 : 0) + (b.usn ? 2 : 0) + (b.uid ? 3 : 0);
-        return scoreB - scoreA;
-      });
+      const sorted = byEmail[email].sort((a, b) => getTributeQualityScore(b) - getTributeQualityScore(a));
       const keep = sorted[0];
       for(let i = 1; i < sorted.length; i++) {
         const removed_tribute = sorted[i];
+        mergeTributeIntoTarget(keep, removed_tribute);
         state.tributes = state.tributes.filter(t => t.id !== removed_tribute.id);
-        keep.uid = keep.uid || removed_tribute.uid;
-        keep.usn = keep.usn || removed_tribute.usn;
-        keep.phone = keep.phone || removed_tribute.phone;
-        keep.branch = keep.branch || removed_tribute.branch;
-        keep.year = keep.year || removed_tribute.year;
-        keep.photoURL = keep.photoURL || removed_tribute.photoURL;
         removed = true;
       }
     }
@@ -2372,11 +2385,17 @@ function findTributeByUid(uid) {
     const tribute = state.tributes.find(t => t.id === mappedId);
     if(tribute) return tribute;
   }
-  return state.tributes.find(t => t.uid === uid);
+  const matches = state.tributes.filter(t => t.uid === uid);
+  if(!matches.length) return null;
+  return matches.sort((a, b) => getTributeQualityScore(b) - getTributeQualityScore(a))[0];
 }
 
 function findTributeByEmail(email) {
-  return state.tributes.find(t => (t.email || '').toLowerCase() === (email || '').toLowerCase());
+  const key = String(email || '').toLowerCase();
+  if(!key) return null;
+  const matches = state.tributes.filter(t => (t.email || '').toLowerCase() === key);
+  if(!matches.length) return null;
+  return matches.sort((a, b) => getTributeQualityScore(b) - getTributeQualityScore(a))[0];
 }
 
 function findTributeById(id) {
