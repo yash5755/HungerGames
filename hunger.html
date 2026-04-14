@@ -833,6 +833,64 @@ nav {
   margin-top: 0.5rem;
 }
 
+.phase-visual {
+  position: relative;
+  border-radius: 14px;
+  border: 1px solid rgba(201,168,76,0.2);
+  overflow: hidden;
+  height: 160px;
+  margin: 0.7rem 0 1rem;
+}
+
+.phase-visual::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  filter: blur(7px) saturate(0.9);
+  transform: scale(1.06);
+}
+
+.phase-visual.phase-phase1.v-1::before {
+  background: radial-gradient(circle at 20% 30%, #ffcf66 0%, #c98d2c 28%, #1b2437 72%);
+}
+
+.phase-visual.phase-phase1.v-2::before {
+  background: linear-gradient(135deg, #2f3f66 0%, #5a7096 45%, #202a3f 100%);
+}
+
+.phase-visual.phase-phase1.v-3::before {
+  background: linear-gradient(120deg, #3c2c56 0%, #2f5b7d 45%, #172233 100%);
+}
+
+.phase-visual.phase-phase2.v-1::before {
+  background: linear-gradient(140deg, #21364d 0%, #2f4f69 42%, #132235 100%);
+}
+
+.phase-visual.phase-phase2.v-2::before {
+  background: linear-gradient(120deg, #3e5d52 0%, #3a4f67 48%, #1b2638 100%);
+}
+
+.phase-visual.phase-phase2.v-3::before {
+  background: radial-gradient(circle at 70% 35%, #608ab7 0%, #365278 45%, #1a2436 100%);
+}
+
+.phase-visual-overlay {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: start;
+  padding: 0.7rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255,245,220,0.95);
+  background: linear-gradient(180deg, rgba(7,11,18,0.05) 40%, rgba(7,11,18,0.6) 100%);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .round4-layout {
   display:grid;
   grid-template-columns:1fr auto;
@@ -3733,6 +3791,7 @@ function renderQuizRoom() {
   const q = questions[index];
   const answer = getQuizAnswerFor(roundKey, tribute.id, q.id);
   const progressPct = Math.round(((index + 1) / total) * 100);
+  const isLastQuestion = index === total - 1;
   const sectionLabel = roundKey === 'r1'
     ? `${phaseInfo.title}`
     : q.section === 'phase1'
@@ -3746,6 +3805,9 @@ function renderQuizRoom() {
   const questionBody = q.type === 'mcq'
     ? `<div class="quiz-options">${(q.options || []).map((opt, i) => `<button class="quiz-option ${answer === String(i) ? 'active' : ''}" onclick="selectQuizOption(${i})">${escapeHTML(opt || ('Option ' + (i + 1)))}</button>`).join('')}</div>`
     : `<div class="form-group"><label class="form-label">Your Answer</label><input class="form-input" id="quizTextAnswer" type="text" value="${escapeHTML(answer)}" placeholder="Type your answer"></div><div class="quiz-actions"><button class="admin-btn admin-btn-primary" onclick="saveQuizTextAnswer()">Save Answer</button></div>`;
+  const phaseVisual = roundKey === 'r1' && (phaseKey === 'phase1' || phaseKey === 'phase2')
+    ? `<div class="phase-visual phase-${phaseKey} v-${(index % 3) + 1}"><div class="phase-visual-overlay">Blurred challenge visual ${index + 1}</div></div>`
+    : '';
 
   body.innerHTML = `
     <div class="quiz-meta">${sectionLabel} · Question ${index + 1} of ${total}</div>
@@ -3753,12 +3815,13 @@ function renderQuizRoom() {
     <div class="quiz-progress">
       <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${progressPct}%"></div></div>
     </div>
+    ${phaseVisual}
     <div class="quiz-question">${escapeHTML(q.prompt || 'Untitled question')}</div>
     ${questionBody}
     <div class="quiz-actions">
       <button class="admin-btn admin-btn-primary" onclick="moveQuizQuestion(-1)" ${index === 0 ? 'disabled' : ''}>Previous</button>
-      <button class="admin-btn admin-btn-primary" onclick="moveQuizQuestion(1)" ${index === total - 1 ? 'disabled' : ''}>Next</button>
-      <button class="admin-btn admin-btn-success" onclick="submitCurrentQuizPhase()">${roundKey === 'r1' && phaseKey !== 'phase3' ? 'Submit Phase' : 'Submit Quiz'}</button>
+      ${!isLastQuestion ? '<button class="admin-btn admin-btn-primary" onclick="moveQuizQuestion(1)">Next</button>' : ''}
+      ${isLastQuestion ? `<button class="admin-btn admin-btn-success" onclick="submitCurrentQuizPhase()">${roundKey === 'r1' && phaseKey !== 'phase3' ? 'Submit Phase' : 'Submit Quiz'}</button>` : ''}
     </div>
   `;
 }
